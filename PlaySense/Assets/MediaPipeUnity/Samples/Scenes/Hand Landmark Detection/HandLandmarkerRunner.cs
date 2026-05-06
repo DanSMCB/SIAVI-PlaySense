@@ -156,17 +156,27 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
-      _handLandmarkerResultAnnotationController.DrawLater(result);
-      if (result.handLandmarks == null || result.handLandmarks.Count == 0)
-          return;
+            _handLandmarkerResultAnnotationController.DrawLater(result);
+            if (result.handLandmarks == null || result.handLandmarks.Count == 0)
+                return;
 
-      var landmarks = result.handLandmarks[0].landmarks;
+            var landmarks = result.handLandmarks[0].landmarks;
 
-      var indexTip = landmarks[8];
-      var thumbTip = landmarks[4];
+            var indexTip = landmarks[8];
+            var thumbTip = landmarks[4];
 
-      handCursor.indexTipPosition = new Vector2(indexTip.x, 1 - indexTip.y);
-      handCursor.thumbTipPosition = new Vector2(thumbTip.x, 1 - thumbTip.y);
+            var wrist = landmarks[0];
+            var indexBase = landmarks[5];
+            var pinkyBase = landmarks[17];
+
+            float centerX = (wrist.x + indexBase.x + pinkyBase.x) / 3f;
+            float centerY = (wrist.y + indexBase.y + pinkyBase.y) / 3f;
+
+            Vector2 palmCenter = new Vector2(centerX, 1 - centerY);
+
+            handCursor.palmPosition = palmCenter;
+            handCursor.indexTipPosition = new Vector2(indexTip.x, 1 - indexTip.y);
+            handCursor.thumbTipPosition = new Vector2(thumbTip.x, 1 - thumbTip.y);
     }
   }
 }

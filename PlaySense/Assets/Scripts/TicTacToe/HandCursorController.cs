@@ -7,6 +7,7 @@ public class HandCursorController : MonoBehaviour
 {
     public RectTransform cursor;
 
+    public Vector2 palmPosition;
     public Vector2 indexTipPosition;
     public Vector2 thumbTipPosition;
 
@@ -21,8 +22,8 @@ public class HandCursorController : MonoBehaviour
 
     void MoveCursor()
     {
-        float x = indexTipPosition.x * Screen.width;
-        float y = indexTipPosition.y * Screen.height;
+        float x = palmPosition.x * Screen.width;
+        float y = palmPosition.y * Screen.height;
 
         cursor.position = Vector2.Lerp(cursor.position, new Vector2(x, y), Time.deltaTime * 10);
     }
