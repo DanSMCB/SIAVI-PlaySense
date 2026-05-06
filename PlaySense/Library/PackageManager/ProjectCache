@@ -1,6 +1,6 @@
 m_ProjectFiles:
   m_ManifestFileStatus:
-    m_FilePath: C:/Users/danie/TicTacToe/Packages/manifest.json
+    m_FilePath: C:/Users/danie/Documents/GitHub/SIAVI-PlaySense/PlaySense/Packages/manifest.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
@@ -8,7 +8,7 @@ m_ProjectFiles:
       ticks: 639135965532495777
     m_Hash: 251048644
   m_LockFileStatus:
-    m_FilePath: C:/Users/danie/TicTacToe/Packages/packages-lock.json
+    m_FilePath: C:/Users/danie/Documents/GitHub/SIAVI-PlaySense/PlaySense/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
@@ -17,8 +17,8 @@ m_ProjectFiles:
     m_Hash: 2192699512
 m_EmbeddedPackageManifests:
   m_ManifestsStatus:
-    C:/Users/danie/TicTacToe/Packages/com.github.homuler.mediapipe/package.json:
-      m_FilePath: C:/Users/danie/TicTacToe/Packages/com.github.homuler.mediapipe/package.json
+    C:/Users/danie/Documents/GitHub/SIAVI-PlaySense/PlaySense/Packages/com.github.homuler.mediapipe/package.json:
+      m_FilePath: C:/Users/danie/Documents/GitHub/SIAVI-PlaySense/PlaySense/Packages/com.github.homuler.mediapipe/package.json
       m_PathExists: 1
       m_ContentTrackingEnabled: 1
       m_ModificationDate:
@@ -27,7 +27,7 @@ m_EmbeddedPackageManifests:
       m_Hash: 951563328
 m_LocalPackages:
   m_LocalFileStatus: []
-m_ProjectPath: C:/Users/danie/TicTacToe/Packages
+m_ProjectPath: C:/Users/danie/Documents/GitHub/SIAVI-PlaySense/PlaySense/Packages
 m_EditorVersion: 6000.0.61f1 (74a0adb02c31)
 m_ResolvedPackages:
 - packageId: com.unity.collab-proxy@2.10.0
@@ -35,7 +35,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 2.10.0
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.collab-proxy@1e5e48aff19d
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.collab-proxy@1e5e48aff19d
   assetPath: Packages/com.unity.collab-proxy
   name: com.unity.collab-proxy
   displayName: Unity Version Control
@@ -235,7 +235,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 2.0.1
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.feature.2d@dd1ea8910f12
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.feature.2d@dd1ea8910f12
   assetPath: Packages/com.unity.feature.2d
   name: com.unity.feature.2d
   displayName: 2D
@@ -378,7 +378,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 3.0.38
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.ide.rider@1f60b3138684
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.ide.rider@1f60b3138684
   assetPath: Packages/com.unity.ide.rider
   name: com.unity.ide.rider
   displayName: JetBrains Rider Editor
@@ -512,7 +512,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 2.0.25
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.ide.visualstudio@74aa435fc4bb
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.ide.visualstudio@74aa435fc4bb
   assetPath: Packages/com.unity.ide.visualstudio
   name: com.unity.ide.visualstudio
   displayName: Visual Studio Editor
@@ -629,7 +629,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.14.2
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.inputsystem@be6c4fd0abf5
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.inputsystem@be6c4fd0abf5
   assetPath: Packages/com.unity.inputsystem
   name: com.unity.inputsystem
   displayName: Input System
@@ -794,7 +794,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.0.0
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.multiplayer.center@f3fb577b3546
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.multiplayer.center@f3fb577b3546
   assetPath: Packages/com.unity.multiplayer.center
   name: com.unity.multiplayer.center
   displayName: Multiplayer Center
@@ -887,7 +887,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 17.0.4
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.render-pipelines.universal@a832bbec7472
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.render-pipelines.universal@a832bbec7472
   assetPath: Packages/com.unity.render-pipelines.universal
   name: com.unity.render-pipelines.universal
   displayName: Universal Render Pipeline
@@ -1013,7 +1013,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.6.0
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.test-framework@da1fb3d479aa
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.test-framework@da1fb3d479aa
   assetPath: Packages/com.unity.test-framework
   name: com.unity.test-framework
   displayName: Test Framework
@@ -1102,7 +1102,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.8.9
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.timeline@6b9e48457ddb
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.timeline@6b9e48457ddb
   assetPath: Packages/com.unity.timeline
   name: com.unity.timeline
   displayName: Timeline
@@ -1305,7 +1305,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 2.0.0
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.ugui@febb2d7f5d88
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.ugui@febb2d7f5d88
   assetPath: Packages/com.unity.ugui
   name: com.unity.ugui
   displayName: Unity UI
@@ -1400,7 +1400,7 @@ m_ResolvedPackages:
   isDirectDependency: 1
   version: 1.9.7
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.visualscripting@6279e2b7c485
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.visualscripting@6279e2b7c485
   assetPath: Packages/com.unity.visualscripting
   name: com.unity.visualscripting
   displayName: Visual Scripting
@@ -4104,12 +4104,12 @@ m_ResolvedPackages:
       scopePatternExpression: 
       message: 
       readMoreLink: 
-- packageId: com.github.homuler.mediapipe@file:C:\Users\danie\TicTacToe\Packages\com.github.homuler.mediapipe
+- packageId: com.github.homuler.mediapipe@file:C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Packages\com.github.homuler.mediapipe
   testable: 1
   isDirectDependency: 1
   version: 0.16.3
   source: 3
-  resolvedPath: C:\Users\danie\TicTacToe\Packages\com.github.homuler.mediapipe
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Packages\com.github.homuler.mediapipe
   assetPath: Packages/com.github.homuler.mediapipe
   name: com.github.homuler.mediapipe
   displayName: MediaPipe Unity Plugin
@@ -4356,7 +4356,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 2.0.5
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.ext.nunit@031a54704bff
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.ext.nunit@031a54704bff
   assetPath: Packages/com.unity.ext.nunit
   name: com.unity.ext.nunit
   displayName: Custom NUnit
@@ -4435,7 +4435,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 17.0.4
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.render-pipelines.core@2e851618efb4
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.render-pipelines.core@2e851618efb4
   assetPath: Packages/com.unity.render-pipelines.core
   name: com.unity.render-pipelines.core
   displayName: Scriptable Render Pipeline Core
@@ -4560,7 +4560,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 17.0.4
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.shadergraph@f2be9996cf20
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.shadergraph@f2be9996cf20
   assetPath: Packages/com.unity.shadergraph
   name: com.unity.shadergraph
   displayName: Shader Graph
@@ -4675,7 +4675,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 17.0.3
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.render-pipelines.universal-config@dd206bf35d04
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.render-pipelines.universal-config@dd206bf35d04
   assetPath: Packages/com.unity.render-pipelines.universal-config
   name: com.unity.render-pipelines.universal-config
   displayName: Universal Render Pipeline Config
@@ -4782,7 +4782,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 10.2.1
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.animation@81ad133dbdf1
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.animation@81ad133dbdf1
   assetPath: Packages/com.unity.2d.animation
   name: com.unity.2d.animation
   displayName: 2D Animation
@@ -4944,6 +4944,7 @@ m_ResolvedPackages:
     - 13.0.2
     - 13.0.3
     - 13.0.4
+    - 13.0.5
     - 14.0.0
     - 14.0.1
     - 14.0.2
@@ -5066,7 +5067,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 5.0.3
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.pixel-perfect@e3ae982b672d
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.pixel-perfect@e3ae982b672d
   assetPath: Packages/com.unity.2d.pixel-perfect
   name: com.unity.2d.pixel-perfect
   displayName: 2D Pixel Perfect
@@ -5175,7 +5176,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 9.1.0
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.psdimporter@e0ffc26deb40
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.psdimporter@e0ffc26deb40
   assetPath: Packages/com.unity.2d.psdimporter
   name: com.unity.2d.psdimporter
   displayName: 2D PSD Importer
@@ -5284,6 +5285,7 @@ m_ResolvedPackages:
     - 11.0.2
     - 12.0.0
     - 12.0.1
+    - 12.0.2
     - 13.0.0
     - 13.0.1
     - 13.0.2
@@ -5388,7 +5390,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.0.0
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.sprite@897b7eecf04e
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.sprite@897b7eecf04e
   assetPath: Packages/com.unity.2d.sprite
   name: com.unity.2d.sprite
   displayName: 2D Sprite
@@ -5467,7 +5469,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 10.0.7
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.spriteshape@9e35352ae135
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.spriteshape@9e35352ae135
   assetPath: Packages/com.unity.2d.spriteshape
   name: com.unity.2d.spriteshape
   displayName: 2D SpriteShape
@@ -5683,7 +5685,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.0.0
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.tilemap@e147c8eadabf
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.tilemap@e147c8eadabf
   assetPath: Packages/com.unity.2d.tilemap
   name: com.unity.2d.tilemap
   displayName: 2D Tilemap Editor
@@ -5779,7 +5781,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 4.1.0
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.tilemap.extras@13634da7dbe0
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.tilemap.extras@13634da7dbe0
   assetPath: Packages/com.unity.2d.tilemap.extras
   name: com.unity.2d.tilemap.extras
   displayName: 2D Tilemap Extras
@@ -5854,6 +5856,7 @@ m_ResolvedPackages:
     - 5.0.2
     - 6.0.0
     - 6.0.1
+    - 6.0.2
     - 7.0.0-exp.1
     - 7.0.0
     - 7.0.1
@@ -5948,7 +5951,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.1.10
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.aseprite@dba7c65ef731
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.aseprite@dba7c65ef731
   assetPath: Packages/com.unity.2d.aseprite
   name: com.unity.2d.aseprite
   displayName: 2D Aseprite Importer
@@ -5992,6 +5995,7 @@ m_ResolvedPackages:
     - 2.0.2
     - 3.0.0
     - 3.0.1
+    - 3.0.2
     - 4.0.0
     - 4.0.1
     - 4.0.2
@@ -6093,7 +6097,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 4.9.3
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.searcher@1e17ce91558d
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.searcher@1e17ce91558d
   assetPath: Packages/com.unity.searcher
   name: com.unity.searcher
   displayName: Searcher
@@ -6191,7 +6195,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.8.25
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.burst@1df634d836b8
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.burst@1df634d836b8
   assetPath: Packages/com.unity.burst
   name: com.unity.burst
   displayName: Burst
@@ -6432,7 +6436,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.3.2
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.mathematics@8017b507cc74
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.mathematics@8017b507cc74
   assetPath: Packages/com.unity.mathematics
   name: com.unity.mathematics
   displayName: Mathematics
@@ -6532,7 +6536,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 2.6.2
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.collections@aea9d3bd5e19
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.collections@aea9d3bd5e19
   assetPath: Packages/com.unity.collections
   name: com.unity.collections
   displayName: Collections
@@ -6723,7 +6727,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.0.1
   source: 2
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.rendering.light-transport@9bd588f963c0
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.rendering.light-transport@9bd588f963c0
   assetPath: Packages/com.unity.rendering.light-transport
   name: com.unity.rendering.light-transport
   displayName: Unity Light Transport Library
@@ -6828,7 +6832,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 9.1.1
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.2d.common@bc041c6e0d0d
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.2d.common@bc041c6e0d0d
   assetPath: Packages/com.unity.2d.common
   name: com.unity.2d.common
   displayName: 2D Common
@@ -6914,6 +6918,7 @@ m_ResolvedPackages:
     - 12.0.0
     - 12.0.1
     - 12.0.2
+    - 12.0.3
     - 13.0.0
     - 13.0.1
     - 13.0.2
@@ -7009,7 +7014,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 1.11.5
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.nuget.mono-cecil@d78732e851eb
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.nuget.mono-cecil@d78732e851eb
   assetPath: Packages/com.unity.nuget.mono-cecil
   name: com.unity.nuget.mono-cecil
   displayName: Mono Cecil
@@ -7103,7 +7108,7 @@ m_ResolvedPackages:
   isDirectDependency: 0
   version: 3.2.0
   source: 1
-  resolvedPath: C:\Users\danie\TicTacToe\Library\PackageCache\com.unity.test-framework.performance@0840f58e4562
+  resolvedPath: C:\Users\danie\Documents\GitHub\SIAVI-PlaySense\PlaySense\Library\PackageCache\com.unity.test-framework.performance@0840f58e4562
   assetPath: Packages/com.unity.test-framework.performance
   name: com.unity.test-framework.performance
   displayName: Performance testing API
