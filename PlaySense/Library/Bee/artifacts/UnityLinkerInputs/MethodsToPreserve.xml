@@ -1,0 +1,64 @@
+<linker>
+	<assembly fullname="Assembly-CSharp" ignoreIfMissing="1">
+		<type fullname="BackgroundChanger">
+			<method name="NextColor"/>
+			<method name="PreviousColor"/>
+		</type>
+		<type fullname="GoogleSpeechManager">
+			<method name="ToggleVoiceMode"/>
+		</type>
+		<type fullname="Mediapipe.Unity.Sample.HandLandmarkDetection.UI.HandLandmarkDetectionConfigWindow">
+			<method name="Exit"/>
+		</type>
+		<type fullname="Mediapipe.Unity.Sample.UI.ImageSourceConfig">
+			<method name="Exit"/>
+		</type>
+		<type fullname="Mediapipe.Unity.Sample.UI.ModalButton">
+			<method name="OpenAndPause"/>
+			<method name="OpenAndPause"/>
+			<method name="OpenAndPause"/>
+		</type>
+		<type fullname="Mediapipe.Unity.Sample.UI.SolutionMenu">
+			<method name="Exit"/>
+		</type>
+		<type fullname="TicTacToe">
+			<method name="ExitGame"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Play"/>
+			<method name="Reset"/>
+		</type>
+	</assembly>
+	<assembly fullname="Unity.RenderPipelines.Core.Runtime" ignoreIfMissing="1">
+		<type fullname="UnityEngine.Rendering.UI.DebugUIHandlerButton">
+			<method name="OnAction"/>
+		</type>
+		<type fullname="UnityEngine.Rendering.UI.DebugUIHandlerIntField">
+			<method name="OnDecrement"/>
+			<method name="OnDecrement"/>
+			<method name="OnIncrement"/>
+			<method name="OnIncrement"/>
+		</type>
+		<type fullname="UnityEngine.Rendering.UI.DebugUIHandlerObjectPopupField">
+			<method name="OnDecrement"/>
+			<method name="OnIncrement"/>
+		</type>
+		<type fullname="UnityEngine.Rendering.UI.DebugUIHandlerPanel">
+			<method name="OnScrollbarClicked"/>
+			<method name="OnScrollbarClicked"/>
+			<method name="ResetDebugManager"/>
+		</type>
+		<type fullname="UnityEngine.Rendering.UI.DebugUIHandlerUIntField">
+			<method name="OnDecrement"/>
+			<method name="OnDecrement"/>
+			<method name="OnIncrement"/>
+			<method name="OnIncrement"/>
+		</type>
+	</assembly>
+</linker>
