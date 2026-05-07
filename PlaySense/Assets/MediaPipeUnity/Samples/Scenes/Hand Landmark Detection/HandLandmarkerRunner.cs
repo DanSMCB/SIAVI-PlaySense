@@ -16,11 +16,14 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
         [SerializeField] private HandLandmarkerResultAnnotationController _handLandmarkerResultAnnotationController;
 
-    private Experimental.TextureFramePool _textureFramePool;
+        private Experimental.TextureFramePool _textureFramePool;
 
-    public readonly HandLandmarkDetectionConfig config = new HandLandmarkDetectionConfig();
+        public readonly HandLandmarkDetectionConfig config = new HandLandmarkDetectionConfig();
+        [SerializeField] private HandLandmarkerUiInputBridge _uiInputBridge;
+        [SerializeField] private HandPaddleInputBridge _paddleInputBridge;
 
-    public HandCursorController handCursor;
+
+        public HandCursorController handCursor;
 
         public override void Stop()
     {
@@ -157,26 +160,33 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
             _handLandmarkerResultAnnotationController.DrawLater(result);
-            if (result.handLandmarks == null || result.handLandmarks.Count == 0)
-                return;
+            if (handCursor != null)
+            {
 
-            var landmarks = result.handLandmarks[0].landmarks;
+                if (result.handLandmarks == null || result.handLandmarks.Count == 0)
+                    return;
 
-            var indexTip = landmarks[8];
-            var thumbTip = landmarks[4];
+                var landmarks = result.handLandmarks[0].landmarks;
 
-            var wrist = landmarks[0];
-            var indexBase = landmarks[5];
-            var pinkyBase = landmarks[17];
+                var indexTip = landmarks[8];
+                var thumbTip = landmarks[4];
 
-            float centerX = (wrist.x + indexBase.x + pinkyBase.x) / 3f;
-            float centerY = (wrist.y + indexBase.y + pinkyBase.y) / 3f;
+                var wrist = landmarks[0];
+                var indexBase = landmarks[5];
+                var pinkyBase = landmarks[17];
 
-            Vector2 palmCenter = new Vector2(centerX, 1 - centerY);
+                float centerX = (wrist.x + indexBase.x + pinkyBase.x) / 3f;
+                float centerY = (wrist.y + indexBase.y + pinkyBase.y) / 3f;
 
-            handCursor.palmPosition = palmCenter;
-            handCursor.indexTipPosition = new Vector2(indexTip.x, 1 - indexTip.y);
-            handCursor.thumbTipPosition = new Vector2(thumbTip.x, 1 - thumbTip.y);
-    }
+                Vector2 palmCenter = new Vector2(centerX, 1 - centerY);
+
+                handCursor.palmPosition = palmCenter;
+                handCursor.indexTipPosition = new Vector2(indexTip.x, 1 - indexTip.y);
+                handCursor.thumbTipPosition = new Vector2(thumbTip.x, 1 - thumbTip.y);
+            }
+
+            _uiInputBridge?.OnHandResult(result);
+            _paddleInputBridge?.OnHandResult(result);
+        }
   }
 }
