@@ -34,6 +34,14 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
         
     protected override IEnumerator Run()
     {
+        config.Delegate = HandLandmarkRuntimeSettings.Delegate;
+        config.ImageReadMode = HandLandmarkRuntimeSettings.ImageReadMode;
+        config.RunningMode = HandLandmarkRuntimeSettings.RunningMode;
+        config.NumHands = HandLandmarkRuntimeSettings.NumHands;
+        config.MinHandDetectionConfidence = HandLandmarkRuntimeSettings.MinHandDetectionConfidence;
+        config.MinHandPresenceConfidence = HandLandmarkRuntimeSettings.MinHandPresenceConfidence;
+        config.MinTrackingConfidence = HandLandmarkRuntimeSettings.MinTrackingConfidence;
+
       Debug.Log($"Delegate = {config.Delegate}");
       Debug.Log($"Image Read Mode = {config.ImageReadMode}");
       Debug.Log($"Running Mode = {config.RunningMode}");

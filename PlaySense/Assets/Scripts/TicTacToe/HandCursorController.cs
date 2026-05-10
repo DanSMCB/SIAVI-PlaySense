@@ -16,12 +16,14 @@ public class HandCursorController : MonoBehaviour
 
     void Update()
     {
+        if (this == null || gameObject == null) return;
         MoveCursor();
         DetectPinch();
     }
 
     void MoveCursor()
     {
+        if (cursor == null) return;
         float x = palmPosition.x * Screen.width;
         float y = palmPosition.y * Screen.height;
 
@@ -46,6 +48,7 @@ public class HandCursorController : MonoBehaviour
 
     void OnPinch()
     {
+        if (cursor == null || EventSystem.current == null) return;
         PointerEventData eventData = new PointerEventData(EventSystem.current);
         eventData.position = cursor.position;
 

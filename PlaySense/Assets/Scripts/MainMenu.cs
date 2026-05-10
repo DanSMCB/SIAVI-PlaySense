@@ -13,6 +13,11 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+
+        isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
+        isTrackersEnabled = PlayerPrefs.GetInt("Trackers", 0) == 1;
+        isBackgroundEnabled = PlayerPrefs.GetInt("Background", 0) == 1;
+
         if (HandTrackingObject != null)
         {
             HandTrackingObject.SetActive(isHandTrackingActive);
@@ -25,31 +30,18 @@ public class MainMenu : MonoBehaviour
         {
             PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.7f);
         }
-    }   
-
-    public void LoadTicTacToe()
-    {
-        SceneManager.LoadScene("TicTacToe");
     }
 
-    public void LoadPong()
-    {
-        SceneManager.LoadScene("PingPong");
-    }
-
-    public void LoadGame3()
-    {
-        SceneManager.LoadScene("Game3");
-    }
-
-    public void ExitGame()
-    {
-        Application.Quit();
-    }
+    public void LoadTicTacToe() => SceneManager.LoadScene("TicTacToe");
+    public void LoadPong() => SceneManager.LoadScene("PingPong");
+    public void LoadReaction() => SceneManager.LoadScene("Reaction");
+    public void ExitGame() => Application.Quit();
 
     public void ToggleHandTracking()
     {
         isHandTrackingActive = !isHandTrackingActive;
+        PlayerPrefs.SetInt("HandTracking", isHandTrackingActive ? 1 : 0);
+        PlayerPrefs.Save();
         if (HandTrackingObject != null)
         {
             HandTrackingObject.SetActive(isHandTrackingActive);
@@ -61,6 +53,8 @@ public class MainMenu : MonoBehaviour
         if (PanelBG != null)
         {
             isBackgroundEnabled = !isBackgroundEnabled;
+            PlayerPrefs.SetInt("Background", isBackgroundEnabled ? 1 : 0);
+            PlayerPrefs.Save();
             PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.7f);
         }
     }
@@ -70,6 +64,8 @@ public class MainMenu : MonoBehaviour
         if (HandTrackingMarker != null)
         {
             isTrackersEnabled = !isTrackersEnabled;
+            PlayerPrefs.SetInt("Trackers", isTrackersEnabled ? 1 : 0);
+            PlayerPrefs.Save();
             HandTrackingMarker.SetActive(isTrackersEnabled);
         }
     }

@@ -43,7 +43,6 @@ public class ReactionUIManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     void Start()
@@ -142,7 +141,7 @@ public class ReactionUIManager : MonoBehaviour
         }
     }
 
-    void HandleLevelCompleted()
+    public void HandleLevelCompleted()
     {
         PopulateStatsScreen();
         ShowScreen(statsScreen);
@@ -172,10 +171,10 @@ public class ReactionUIManager : MonoBehaviour
 
     void ShowScreen(GameObject target)
     {
-        mainMenuScreen.SetActive(target == mainMenuScreen);
-        level1Screen.SetActive(target == level1Screen);
-        level2Screen.SetActive(target == level2Screen);
-        statsScreen.SetActive(target == statsScreen);
+        if (mainMenuScreen != null) mainMenuScreen.SetActive(target == mainMenuScreen);
+        if (level1Screen != null) level1Screen.SetActive(target == level1Screen);
+        if (level2Screen != null) level2Screen.SetActive(target == level2Screen);
+        if (statsScreen != null) statsScreen.SetActive(target == statsScreen);
     }
 
     void ShowLevelScreen(int level)

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
+using System.Net;
 using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class ReactionGoogleSpeechManager : MonoBehaviour
 {
@@ -20,12 +23,8 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
 
     private AudioClip recordedClip;
     private string microphoneDevice;
-    private const int sampleRate = 16000;
+    private const int sampleRate = 44100;//16000;
     private const int maxRecordingSeconds = 2;
-
-    // ─────────────────────────────────────────────────────────────
-    // TOGGLE — ligar ao Toggle da UI
-    // ─────────────────────────────────────────────────────────────
 
     public void ToggleVoiceMode()
     {
@@ -33,70 +32,95 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
 
         if (isListening)
         {
-            if (speechToTextOutput != null) speechToTextOutput.enabled = true;
+            speechToTextOutput.enabled = true;
             StartRecording();
-            Debug.Log("[Speech] Voice mode ON");
         }
         else
         {
             Microphone.End(null);
             StopAllCoroutines();
-            if (speechToTextOutput != null) speechToTextOutput.enabled = false;
-            Debug.Log("[Speech] Voice mode OFF");
+            Debug.Log("Voice mode desligado");
+            speechToTextOutput.enabled = false;
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // GRAVAÇÃO
-    // ─────────────────────────────────────────────────────────────
-
     public void StartRecording()
     {
-        if (Microphone.devices.Length == 0)
+        if (Microphone.devices.Length == 0) return;
+
+        if (recordedClip != null)
         {
-            Debug.LogError("[Speech] Nenhum microfone encontrado.");
-            return;
+            Destroy(recordedClip);
         }
 
         microphoneDevice = Microphone.devices[0];
-        recordedClip = Microphone.Start(microphoneDevice, false, maxRecordingSeconds, sampleRate);
-        StartCoroutine(AutoStopRecording());
-        Debug.Log("[Speech] A gravar...");
+        recordedClip = Microphone.Start(microphoneDevice, false, 10, sampleRate);
+        StartCoroutine(WaitAndStop());
+    }
+
+    IEnumerator WaitAndStop()
+    {
+        // Esperamos os 2 segundos de fala
+        yield return new WaitForSeconds(maxRecordingSeconds);
+
+        // Damos um pequeno fôlego de 0.1s para o buffer processar
+        yield return new WaitForEndOfFrame();
+
+        StopRecordingAndTranscribe();
     }
 
     IEnumerator AutoStopRecording()
     {
-        yield return new WaitForSeconds(maxRecordingSeconds);
+        yield return new WaitForSeconds(2f);
         StopRecordingAndTranscribe();
     }
 
     public void StopRecordingAndTranscribe()
     {
-        if (string.IsNullOrWhiteSpace(microphoneDevice)) return;
+        if (recordedClip == null) return;
 
         int position = Microphone.GetPosition(microphoneDevice);
+
+        // LOG DE DEBUG IMPORTANTE
+        Debug.Log($"Posição final do buffer: {position}");
+
         Microphone.End(microphoneDevice);
 
         if (position <= 0)
         {
-            Debug.LogError("[Speech] Não foi captado áudio.");
+            Debug.LogError("O microfone não captou nada. Tentando reiniciar...");
+            if (isListening) Invoke("StartRecording", 0.5f);
             return;
         }
 
+        // Criar os samples com base na posição real capturada
         float[] samples = new float[position * recordedClip.channels];
         recordedClip.GetData(samples, 0);
 
-        AudioClip trimmedClip = AudioClip.Create("trimmed", position, recordedClip.channels, recordedClip.frequency, false);
+        // temp
+        float maxVolume = 0;
+        for (int i = 0; i < samples.Length; i++)
+        {
+            float absVal = Mathf.Abs(samples[i]);
+            if (absVal > maxVolume) maxVolume = absVal;
+        }
+
+        // Se o som for muito baixo, vamos amplificá-lo manualmente
+        if (maxVolume > 0 && maxVolume < 0.5f)
+        {
+            float multiplier = 0.7f / maxVolume; // Alvo de 70% do volume máximo
+            for (int i = 0; i < samples.Length; i++) samples[i] *= multiplier;
+            Debug.Log($"Áudio amplificado em {multiplier}x");
+        }
+
+
+        AudioClip trimmedClip = AudioClip.Create("trimmed", position, recordedClip.channels, sampleRate, false);
         trimmedClip.SetData(samples, 0);
 
         StartCoroutine(SendAudioToSpeechToText(trimmedClip));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // ENVIO PARA GOOGLE API
-    // ─────────────────────────────────────────────────────────────
-
-    IEnumerator SendAudioToSpeechToText(AudioClip clip)
+    private IEnumerator SendAudioToSpeechToText(AudioClip clip)
     {
         byte[] wavBytes = WavUtility.FromAudioClip(clip);
         string base64Audio = Convert.ToBase64String(wavBytes);
@@ -109,123 +133,166 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
                 sampleRateHertz = sampleRate,
                 languageCode = "pt-PT"
             },
-            audio = new RecognitionAudio { content = base64Audio }
+            audio = new RecognitionAudio
+            {
+                content = base64Audio
+            }
         };
 
         string json = JsonUtility.ToJson(requestBody);
 
-        using UnityWebRequest request = new UnityWebRequest(speechToTextUrl, "POST");
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+        string finalUrl = $"{speechToTextUrl}?key={bearerToken}";
+
+        using UnityWebRequest request = new UnityWebRequest(finalUrl, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
+
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", "Bearer " + bearerToken);
 
         yield return request.SendWebRequest();
 
+        if (isListening)
+        {
+            StartRecording();
+        }
+
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("[Speech] Erro: " + request.error);
+            Debug.LogError("Erro no Speech-to-Text: " + request.error);
             Debug.LogError(request.downloadHandler.text);
-            if (isListening) StartRecording();
             yield break;
         }
 
+        // ... resto do código igual (processamento da resposta)
         string responseJson = request.downloadHandler.text;
-        Debug.Log("[Speech] Resposta: " + responseJson);
+        Debug.Log("Resposta STT: " + responseJson);
 
+        // (Continua com o JsonUtility.FromJson...)
         SpeechToTextResponse response = JsonUtility.FromJson<SpeechToTextResponse>(responseJson);
-
-        if (response?.results != null && response.results.Length > 0)
+        if (response != null && response.results != null && response.results.Length > 0)
         {
-            var sb = new StringBuilder();
-            foreach (var result in response.results)
-                if (result.alternatives?.Length > 0)
-                    sb.Append(result.alternatives[0].transcript).Append(" ");
-
-            string recognized = sb.ToString().Trim().ToLower();
-
-            if (speechToTextOutput != null)
-                speechToTextOutput.text = recognized;
-
-            HandleVoiceCommand(recognized);
+            string recognizedText = response.results[0].alternatives[0].transcript.ToLower();
+            speechToTextOutput.text = recognizedText;
+            HandleVoiceCommand(recognizedText); // Ativa os botões!
         }
-        else
-        {
-            if (speechToTextOutput != null)
-                speechToTextOutput.text = "...";
-        }
-
-        // Loop contínuo enquanto o toggle estiver ativo
-        if (isListening) StartRecording();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // INTERPRETAÇÃO — número 1 a 9
-    // ─────────────────────────────────────────────────────────────
 
     void HandleVoiceCommand(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
 
-        // Tenta diretamente como número
-        if (int.TryParse(text.Trim(), out int number))
+        // 1. Limpeza e Conversão de texto para número
+        string processedText = text.ToLower()
+            .Replace("um", "1").Replace("dois", "2").Replace("três", "3").Replace("tres", "3")
+            .Replace("quatro", "4").Replace("cinco", "5").Replace("seis", "6")
+            .Replace("sete", "7").Replace("oito", "8").Replace("nove", "9");
+
+        int number = -1;
+        foreach (char c in processedText)
         {
-            ExecuteButton(number);
-            return;
+            if (char.IsDigit(c))
+            {
+                number = (int)char.GetNumericValue(c);
+                break;
+            }
         }
 
-        // Fallback: palavras pt-PT → números
-        switch (text.Trim())
+        if (number == -1) return;
+
+        // 2. Lógica de Contexto baseada no ReactionUIManager
+        var ui = ReactionUIManager.Instance;
+        var gm = ReactionGameManager.Instance;
+
+        // CONTEXTO: MENU PRINCIPAL
+        if (ui.mainMenuScreen.activeSelf)
         {
-            case "um": ExecuteButton(1); break;
-            case "dois": ExecuteButton(2); break;
-            case "três": case "tres": ExecuteButton(3); break;
-            case "quatro": ExecuteButton(4); break;
-            case "cinco": ExecuteButton(5); break;
-            case "seis": ExecuteButton(6); break;
-            case "sete": ExecuteButton(7); break;
-            case "oito": ExecuteButton(8); break;
-            case "nove": ExecuteButton(9); break;
-            default:
-                Debug.Log($"[Speech] Não reconhecido: \"{text}\"");
-                break;
+            switch (number)
+            {
+                case 1: ui.btnLevel1.onClick.Invoke(); break;
+                case 2: ui.btnLevel2.onClick.Invoke(); break;
+                case 3: ui.btnQuit.onClick.Invoke(); break;
+            }
+        }
+        // CONTEXTO: ECRÃ DE ESTATÍSTICAS (FIM DE JOGO)
+        else if (ui.statsScreen.activeSelf)
+        {
+            switch (number)
+            {
+                case 1: ui.btnPlayAgain.onClick.Invoke(); break;
+                case 2:
+                    if (gm.HasNextLevel()) ui.btnNextLevel.onClick.Invoke();
+                    else ui.btnMainMenu.onClick.Invoke(); // Se não houver próximo, volta ao menu
+                    break;
+                case 3: ui.btnMainMenu.onClick.Invoke(); break;
+            }
+        }
+        // CONTEXTO: DENTRO DO JOGO (Nível 1 ou 2)
+        else if (ui.level1Screen.activeSelf || ui.level2Screen.activeSelf)
+        {
+            // Se o round estiver a decorrer, o número clica no botão
+            if (gm.RoundActive)
+            {
+                ExecuteButton(number);
+            }
         }
     }
 
     void ExecuteButton(int number)
     {
-        int index = number - 1; // 0-based
+        int index = number - 1; // "1" vira índice 0
+        var gm = ReactionGameManager.Instance;
 
-        int maxButtons = ReactionGameManager.Instance.CurrentLevel == 1
-            ? ReactionGameManager.Instance.level1ButtonCount
-            : ReactionGameManager.Instance.level2ButtonCount;
+        int maxButtons = gm.CurrentLevel == 1 ? gm.level1ButtonCount : gm.level2ButtonCount;
 
-        if (index < 0 || index >= maxButtons)
-        {
-            Debug.LogWarning($"[Speech] Número {number} inválido para este nível (max: {maxButtons})");
-            if (speechToTextOutput != null)
-                speechToTextOutput.text = $"{number} inválido";
-            return;
-        }
+        if (index < 0 || index >= maxButtons) return;
+        if (!gm.RoundActive) return;
 
-        if (!ReactionGameManager.Instance.RoundActive) return;
+        // Verifica se este índice era um dos coloridos este round
+        bool wasColored = gm.ColoredIndicesThisRound.Contains(index);
 
-        Debug.Log($"[Speech] Botão {number} → índice {index}");
-        if (speechToTextOutput != null)
-            speechToTextOutput.text = $"output {number}";
-
-        bool wasColored = ReactionGameManager.Instance.ColoredIndicesThisRound.Contains(index);
-        ReactionUIManager.Instance?.OnButtonTapped(index, wasColored);
+        // Chama a animação e o registo do hit no UI Manager
+        ReactionUIManager.Instance.OnButtonTapped(index, wasColored);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // CLASSES SERIALIZÁVEIS
-    // ─────────────────────────────────────────────────────────────
+    [Serializable]
+    public class SpeechToTextRequest
+    {
+        public RecognitionConfig config;
+        public RecognitionAudio audio;
+    }
 
-    [Serializable] public class SpeechToTextRequest { public RecognitionConfig config; public RecognitionAudio audio; }
-    [Serializable] public class RecognitionConfig { public string encoding; public int sampleRateHertz; public string languageCode; }
-    [Serializable] public class RecognitionAudio { public string content; }
-    [Serializable] public class SpeechToTextResponse { public SpeechRecognitionResult[] results; }
-    [Serializable] public class SpeechRecognitionResult { public SpeechRecognitionAlternative[] alternatives; }
-    [Serializable] public class SpeechRecognitionAlternative { public string transcript; public float confidence; }
+    [Serializable]
+    public class RecognitionConfig
+    {
+        public string encoding;
+        public int sampleRateHertz;
+        public string languageCode;
+    }
+
+    [Serializable]
+    public class RecognitionAudio
+    {
+        public string content;
+    }
+
+    [Serializable]
+    public class SpeechToTextResponse
+    {
+        public SpeechRecognitionResult[] results;
+    }
+
+    [Serializable]
+    public class SpeechRecognitionResult
+    {
+        public SpeechRecognitionAlternative[] alternatives;
+    }
+
+    [Serializable]
+    public class SpeechRecognitionAlternative
+    {
+        public string transcript;
+        public float confidence;
+    }
 }
