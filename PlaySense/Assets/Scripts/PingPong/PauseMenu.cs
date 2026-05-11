@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class MainMenu : MonoBehaviour
+public class PauseMenu : MonoBehaviour
 {
     public GameObject HandTrackingMarker;
     public GameObject HandTrackingObject;
@@ -14,6 +14,10 @@ public class MainMenu : MonoBehaviour
     public Toggle CameraToggle;
     public Toggle LandmarkToggle;
 
+    public GameObject MenuObject;
+    public GameObject WinScreen;
+    public HandPaddleInputBridge HandPaddleInputBridge;
+
     void Start()
     {
 
@@ -23,7 +27,10 @@ public class MainMenu : MonoBehaviour
 
         if (HandTrackingObject != null)
         {
-            HandTrackingObject.SetActive(isHandTrackingActive);
+            if (isHandTrackingActive)  
+                HandTrackingObject.SetActive(true);
+            else
+                HandTrackingObject.SetActive(false);
             HandTrackingToggle.isOn = isHandTrackingActive;
         }
         if (HandTrackingMarker != null)
@@ -33,17 +40,28 @@ public class MainMenu : MonoBehaviour
         }
         if (PanelBG != null)
         {
-            PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.7f);
+            PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.3f);
             CameraToggle.isOn = !isBackgroundEnabled;
         }
 
         ActivateCameraSettings();
     }
 
-    public void LoadTicTacToe() => SceneManager.LoadScene("TicTacToe");
-    public void LoadPong() => SceneManager.LoadScene("PingPong");
-    public void LoadReaction() => SceneManager.LoadScene("Reaction");
-    public void ExitGame() => Application.Quit();
+    public void LoadMainMenu() => SceneManager.LoadScene("Main Menu");
+    public void StartGame()
+    {
+        MenuObject.SetActive(false);
+        HandTrackingObject.SetActive(false);
+        HandPaddleInputBridge.SetHandTrackingActive(isHandTrackingActive);
+        HandPaddleInputBridge.ResetGame();
+    }
+
+    public void ReturnMenu()
+    {
+        MenuObject.SetActive(true);
+        HandTrackingObject.SetActive(isHandTrackingActive);
+        WinScreen.SetActive(false);
+    }
 
     public void ToggleHandTracking()
     {

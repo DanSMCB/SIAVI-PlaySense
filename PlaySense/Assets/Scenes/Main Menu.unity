@@ -4581,7 +4581,10 @@ MonoBehaviour:
   PanelBG: {fileID: 2058337848}
   isHandTrackingActive: 0
   isTrackersEnabled: 0
-  isBackgroundEnabled: 1
+  isBackgroundEnabled: 0
+  HandTrackingToggle: {fileID: 1924050079}
+  CameraToggle: {fileID: 1080557468}
+  LandmarkToggle: {fileID: 1094531672}
 --- !u!4 &1993434730
 Transform:
   m_ObjectHideFlags: 0
