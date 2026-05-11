@@ -77,7 +77,6 @@ public class ReactionGameManager : MonoBehaviour
         if (useHandTracking)
             StartCoroutine(DelayedHandTrackingStart());
 
-        Debug.Log($"HandTracking: {useHandTracking}, Annotations: {PlayerPrefs.GetInt("Trackers", 0)}");
     }
 
     void LoadModuleSettings()
@@ -174,8 +173,6 @@ public class ReactionGameManager : MonoBehaviour
             if (speechManager != null)
                 speechManager.ToggleVoiceMode();
         }
-
-        Debug.Log($"[ReactionGameManager] Speech {(_speechActive ? "ON" : "OFF")}");
     }
 
     public void GoBack()

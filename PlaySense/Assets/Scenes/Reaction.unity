@@ -1684,6 +1684,7 @@ MonoBehaviour:
   useVoiceMode: 0
   useHandTracking: 1
   useAnnotations: 0
+  cameraVisible: 0
   audioModule: {fileID: 1056949159}
   mediapipeModule: {fileID: 1154353065}
   handRunner: {fileID: 1154353066}
@@ -1694,7 +1695,7 @@ MonoBehaviour:
   - {fileID: 658289295}
   - {fileID: 943239663}
   - {fileID: 75571463}
-  cameraScreen: {fileID: 1955304107}
+  cameraScreen: {fileID: 446687550}
   level1ButtonCount: 6
   level2ButtonCount: 9
   maxRoundsPerLevel: 10
@@ -2169,6 +2170,11 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &446687550 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8571076842583978906, guid: 140d1d2c406167c50819d89f86d9092e, type: 3}
+  m_PrefabInstance: {fileID: 1955304104}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &468620495
 GameObject:
   m_ObjectHideFlags: 0
@@ -8314,11 +8320,6 @@ RectTransform:
 --- !u!224 &1955304106 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8571076844135231236, guid: 140d1d2c406167c50819d89f86d9092e, type: 3}
-  m_PrefabInstance: {fileID: 1955304104}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1955304107 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8571076842338426121, guid: 140d1d2c406167c50819d89f86d9092e, type: 3}
   m_PrefabInstance: {fileID: 1955304104}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1967705616

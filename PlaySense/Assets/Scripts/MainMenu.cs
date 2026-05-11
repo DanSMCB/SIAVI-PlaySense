@@ -7,37 +7,50 @@ public class MainMenu : MonoBehaviour
     public GameObject HandTrackingMarker;
     public GameObject HandTrackingObject;
     public Image PanelBG;
-    private bool isHandTrackingActive = false;
-    private bool isTrackersEnabled = false;
-    private bool isBackgroundEnabled = false;
+    public GameObject SpeechModule;
+    private bool isHandTrackingActive;
+    private bool isTrackersEnabled;
+    private bool isBackgroundEnabled;
+    private bool isSpeechEnabled;
     public Toggle HandTrackingToggle;
     public Toggle CameraToggle;
     public Toggle LandmarkToggle;
+    public Toggle VoiceToggle;
 
     void Start()
     {
-
-        isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
-        isTrackersEnabled = PlayerPrefs.GetInt("Trackers", 0) == 1;
-        isBackgroundEnabled = PlayerPrefs.GetInt("Background", 0) == 1;
+        LoadModuleSettings();
 
         if (HandTrackingObject != null)
         {
             HandTrackingObject.SetActive(isHandTrackingActive);
-            HandTrackingToggle.isOn = isHandTrackingActive;
+            HandTrackingToggle.SetIsOnWithoutNotify(isHandTrackingActive);
         }
         if (HandTrackingMarker != null)
         {
             HandTrackingMarker.SetActive(isTrackersEnabled);
-            LandmarkToggle.isOn = isTrackersEnabled;
+            LandmarkToggle.SetIsOnWithoutNotify(isTrackersEnabled);
         }
         if (PanelBG != null)
         {
             PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.7f);
-            CameraToggle.isOn = !isBackgroundEnabled;
+            CameraToggle.SetIsOnWithoutNotify(!isBackgroundEnabled);
+        }
+        if (SpeechModule != null)
+        {
+            SpeechModule.SetActive(isSpeechEnabled);
+            VoiceToggle.SetIsOnWithoutNotify(isSpeechEnabled);
         }
 
         ActivateCameraSettings();
+    }
+
+    void LoadModuleSettings()
+    {
+        isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
+        isTrackersEnabled = PlayerPrefs.GetInt("Trackers", 0) == 1;
+        isBackgroundEnabled = PlayerPrefs.GetInt("Background", 0) == 1;
+        isSpeechEnabled = PlayerPrefs.GetInt("VoiceMode", 0) == 1;
     }
 
     public void LoadTicTacToe() => SceneManager.LoadScene("TicTacToe");
@@ -79,6 +92,16 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    public void ToggleVoiceControl()
+    {
+        if (SpeechModule == null) { return; }
+
+        isSpeechEnabled = !isSpeechEnabled;
+        PlayerPrefs.SetInt("VoiceMode", isSpeechEnabled ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+
     public void ActivateCameraSettings()
     {
         if (isHandTrackingActive)
@@ -89,14 +112,14 @@ public class MainMenu : MonoBehaviour
         else
         {
             CameraToggle.interactable = false;
-            CameraToggle.isOn = false;
+            CameraToggle.SetIsOnWithoutNotify(false);
             isBackgroundEnabled = true;
             PanelBG.color = new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f);
             PlayerPrefs.SetInt("Trackers", isTrackersEnabled ? 1 : 0);
             PlayerPrefs.Save();
 
             LandmarkToggle.interactable = false;
-            LandmarkToggle.isOn = false;
+            LandmarkToggle.SetIsOnWithoutNotify(false);
             isTrackersEnabled = false;
             HandTrackingMarker.SetActive(isTrackersEnabled);
             PlayerPrefs.SetInt("Background", isBackgroundEnabled ? 1 : 0);

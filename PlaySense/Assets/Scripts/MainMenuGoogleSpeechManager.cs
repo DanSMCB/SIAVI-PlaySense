@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
-public class ReactionGoogleSpeechManager : MonoBehaviour
+public class MainMenuGoogleSpeechManager : MonoBehaviour
 {
     bool isListening = false;
 
@@ -19,25 +19,20 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
     public string speechToTextUrl = "https://speech.googleapis.com/v1/speech:recognize";
 
     [Header("VAD Settings")]
-    public float silenceThreshold = 0.02f;  // volume mínimo para considerar fala
-    public float silenceDuration = 0.8f;   // segundos de silêncio para cortar
-    public float maxRecordingSeconds = 5f;     // máximo de gravação por utterance
+    public float silenceThreshold = 0.02f;
+    public float silenceDuration = 0.8f;
+    public float maxRecordingSeconds = 5f;
 
     private AudioClip recordedClip;
     private string microphoneDevice;
     private const int sampleRate = 44100;
 
-    // ─────────────────────────────────────────────────────────────
     void Awake()
     {
         bool voiceEnabled = PlayerPrefs.GetInt("VoiceMode", 0) == 1;
         Debug.Log($"[Speech] VoiceMode ao iniciar: {voiceEnabled}");
         if (voiceEnabled) ToggleVoiceMode();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // TOGGLE
-    // ─────────────────────────────────────────────────────────────
 
     public void ToggleVoiceMode()
     {
@@ -58,22 +53,15 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // LOOP PRINCIPAL — VAD
-    // ─────────────────────────────────────────────────────────────
-
     IEnumerator ListenContinuously()
     {
         while (isListening)
         {
-            // 1. Espera detetar voz
             yield return StartCoroutine(WaitForSpeech());
             if (!isListening) yield break;
 
-            // 2. Grava até silêncio ou timeout
             yield return StartCoroutine(RecordUntilSilence());
 
-            // 3. Pequena pausa antes de voltar a ouvir
             yield return new WaitForSeconds(0.2f);
         }
     }
@@ -81,12 +69,13 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
     IEnumerator WaitForSpeech()
     {
         if (speechToTextOutput != null) speechToTextOutput.text = "🎤 ...";
-        Debug.Log("[Speech] À espera de voz...");
 
         if (Microphone.devices.Length == 0) yield break;
 
         microphoneDevice = Microphone.devices[0];
-        recordedClip = Microphone.Start(microphoneDevice, true, 1, sampleRate);
+
+        // Grava já em loop com buffer grande — não perde o início
+        recordedClip = Microphone.Start(microphoneDevice, true, (int)maxRecordingSeconds, sampleRate);
 
         while (isListening)
         {
@@ -101,13 +90,12 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
 
     IEnumerator RecordUntilSilence()
     {
-        // Para o clip de monitorização e começa gravação real
-        Microphone.End(microphoneDevice);
-        yield return null;
-
+        // NÃO paras o microfone — continuas a gravar no mesmo clip
         if (speechToTextOutput != null) speechToTextOutput.text = "🎤 A ouvir...";
-        recordedClip = Microphone.Start(microphoneDevice, false, (int)maxRecordingSeconds, sampleRate);
         Debug.Log("[Speech] A gravar fala...");
+
+        // Marca onde começou a fala (com 0.3s de buffer antes)
+        int startPos = Mathf.Max(0, Microphone.GetPosition(microphoneDevice) - (int)(sampleRate * 0.3f));
 
         float silenceTimer = 0f;
         float recordingTimer = 0f;
@@ -126,10 +114,54 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
             if (silenceTimer >= silenceDuration || recordingTimer >= maxRecordingSeconds)
             {
                 Debug.Log($"[Speech] Fim de fala — silêncio: {silenceTimer:F1}s | total: {recordingTimer:F1}s");
-                StopRecordingAndTranscribe();
+
+                // Para o microfone e extrai só a parte com fala
+                int endPos = Microphone.GetPosition(microphoneDevice);
+                Microphone.End(microphoneDevice);
+
+                ExtractAndSend(startPos, endPos);
                 yield break;
             }
         }
+    }
+
+    void ExtractAndSend(int startPos, int endPos)
+    {
+        int clipLen = recordedClip.samples;
+        int length = endPos > startPos
+            ? endPos - startPos
+            : (clipLen - startPos) + endPos; // wrap-around do buffer circular
+
+        if (length <= 0) return;
+
+        float[] samples = new float[length * recordedClip.channels];
+
+        // Copia os samples respeitando o wrap-around
+        if (endPos > startPos)
+        {
+            recordedClip.GetData(samples, startPos);
+        }
+        else
+        {
+            // Buffer fez wrap — copia em duas partes
+            float[] part1 = new float[(clipLen - startPos) * recordedClip.channels];
+            float[] part2 = new float[endPos * recordedClip.channels];
+            recordedClip.GetData(part1, startPos);
+            recordedClip.GetData(part2, 0);
+            part1.CopyTo(samples, 0);
+            part2.CopyTo(samples, part1.Length);
+        }
+
+        AudioClip trimmed = AudioClip.Create("trimmed", length, recordedClip.channels, sampleRate, false);
+        trimmed.SetData(samples, 0);
+
+        // DEBUG — guarda o WAV para ouvires
+        byte[] debugWav = WavUtility.FromAudioClip(trimmed);
+        string path = Application.persistentDataPath + "/debug_audio.wav";
+        System.IO.File.WriteAllBytes(path, debugWav);
+        Debug.Log($"[Speech] WAV guardado em: {path}");
+
+        StartCoroutine(SendAudioToSpeechToText(trimmed));
     }
 
     float GetCurrentVolume()
@@ -139,7 +171,7 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
         int pos = Microphone.GetPosition(microphoneDevice);
         if (pos <= 0) return 0f;
 
-        int sampleCount = sampleRate / 10; // últimos 0.1s
+        int sampleCount = sampleRate / 10;
         int startPos = Mathf.Max(0, pos - sampleCount);
         int length = pos - startPos;
         if (length <= 0) return 0f;
@@ -184,15 +216,21 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
             if (abs > maxVolume) maxVolume = abs;
         }
 
-        if (maxVolume > 0 && maxVolume < 0.5f)
-        {
-            float multiplier = 0.9f / maxVolume;
-            for (int i = 0; i < samples.Length; i++) samples[i] *= multiplier;
-            Debug.Log($"[Speech] Amplificado {multiplier:F1}x");
-        }
+        //if (maxVolume > 0 && maxVolume < 0.5f)
+        //{
+        //    float multiplier = 0.9f / maxVolume;
+        //    for (int i = 0; i < samples.Length; i++) samples[i] *= multiplier;
+        //    Debug.Log($"[Speech] Amplificado {multiplier:F1}x");
+        //}
 
         AudioClip trimmedClip = AudioClip.Create("trimmed", position, recordedClip.channels, sampleRate, false);
         trimmedClip.SetData(samples, 0);
+
+        // DEBUG — guarda o WAV para ouvires
+        byte[] debugWav = WavUtility.FromAudioClip(trimmedClip);
+        string path = Application.persistentDataPath + "/debug_audio.wav";
+        System.IO.File.WriteAllBytes(path, debugWav);
+        Debug.Log($"[Speech] WAV guardado em: {path}");
 
         StartCoroutine(SendAudioToSpeechToText(trimmedClip));
     }
@@ -227,10 +265,12 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
 
         yield return request.SendWebRequest();
 
+        Debug.Log($"[Speech] HTTP Status: {request.responseCode}");
+        Debug.Log($"[Speech] Resposta completa: {request.downloadHandler.text}");
+
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("[Speech] Erro: " + request.error);
-            Debug.LogError(request.downloadHandler.text);
             yield break;
         }
 
@@ -252,7 +292,7 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────────
-    // INTERPRETAÇÃO
+    // INTERPRETAÇÃO — navegação do menu principal
     // ─────────────────────────────────────────────────────────────
 
     void HandleVoiceCommand(string text)
@@ -262,9 +302,7 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
         string processedText = text.ToLower()
             .Replace("um", "1").Replace("dois", "2")
             .Replace("três", "3").Replace("tres", "3")
-            .Replace("quatro", "4").Replace("cinco", "5")
-            .Replace("seis", "6").Replace("sete", "7")
-            .Replace("oito", "8").Replace("nove", "9");
+            .Replace("quatro", "4");
 
         int number = -1;
         foreach (char c in processedText)
@@ -274,53 +312,15 @@ public class ReactionGoogleSpeechManager : MonoBehaviour
 
         if (number == -1) return;
 
-        var ui = ReactionUIManager.Instance;
-        var gm = ReactionGameManager.Instance;
+        Debug.Log($"[Speech] Comando: {number}");
 
-        if (ui == null || gm == null) return;
-
-        // Menu principal do jogo de reação
-        if (ui.mainMenuScreen.activeSelf)
+        switch (number)
         {
-            switch (number)
-            {
-                case 1: ui.btnLevel1.onClick.Invoke(); break;
-                case 2: ui.btnLevel2.onClick.Invoke(); break;
-                case 3: ui.btnQuit.onClick.Invoke(); break;
-            }
+            case 1: SceneManager.LoadScene("TicTacToe"); break;
+            case 2: SceneManager.LoadScene("PingPong"); break;
+            case 3: SceneManager.LoadScene("Reaction"); break;
+            case 4: Application.Quit(); break;
         }
-        // Ecrã de estatísticas
-        else if (ui.statsScreen.activeSelf)
-        {
-            switch (number)
-            {
-                case 1: ui.btnPlayAgain.onClick.Invoke(); break;
-                case 2:
-                    if (gm.HasNextLevel()) ui.btnNextLevel.onClick.Invoke();
-                    else ui.btnMainMenu.onClick.Invoke();
-                    break;
-                case 3: ui.btnMainMenu.onClick.Invoke(); break;
-            }
-        }
-        // Dentro do jogo
-        else if (ui.level1Screen.activeSelf || ui.level2Screen.activeSelf)
-        {
-            if (gm.RoundActive) ExecuteButton(number);
-        }
-    }
-
-    void ExecuteButton(int number)
-    {
-        int index = number - 1;
-        var gm = ReactionGameManager.Instance;
-
-        int maxButtons = gm.CurrentLevel == 1 ? gm.level1ButtonCount : gm.level2ButtonCount;
-
-        if (index < 0 || index >= maxButtons) return;
-        if (!gm.RoundActive) return;
-
-        bool wasColored = gm.ColoredIndicesThisRound.Contains(index);
-        ReactionUIManager.Instance.OnButtonTapped(index, wasColored);
     }
 
     // ─────────────────────────────────────────────────────────────
