@@ -99,6 +99,7 @@ public class MainMenu : MonoBehaviour
         isSpeechEnabled = !isSpeechEnabled;
         PlayerPrefs.SetInt("VoiceMode", isSpeechEnabled ? 1 : 0);
         PlayerPrefs.Save();
+        SpeechModule.SetActive(isSpeechEnabled);
     }
 
 

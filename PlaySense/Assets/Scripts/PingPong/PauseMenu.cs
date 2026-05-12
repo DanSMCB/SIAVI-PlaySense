@@ -7,9 +7,9 @@ public class PauseMenu : MonoBehaviour
     public GameObject HandTrackingMarker;
     public GameObject HandTrackingObject;
     public Image PanelBG;
-    private bool isHandTrackingActive = false;
-    private bool isTrackersEnabled = false;
-    private bool isBackgroundEnabled = false;
+    private bool isHandTrackingActive;
+    private bool isTrackersEnabled;
+    private bool isBackgroundEnabled;
     public Toggle HandTrackingToggle;
     public Toggle CameraToggle;
     public Toggle LandmarkToggle;
@@ -20,31 +20,32 @@ public class PauseMenu : MonoBehaviour
 
     void Start()
     {
-
-        isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
-        isTrackersEnabled = PlayerPrefs.GetInt("Trackers", 0) == 1;
-        isBackgroundEnabled = PlayerPrefs.GetInt("Background", 0) == 1;
+        LoadModuleSettings();
 
         if (HandTrackingObject != null)
         {
-            if (isHandTrackingActive)  
-                HandTrackingObject.SetActive(true);
-            else
-                HandTrackingObject.SetActive(false);
-            HandTrackingToggle.isOn = isHandTrackingActive;
+            HandTrackingObject.SetActive(isHandTrackingActive);
+            HandTrackingToggle.SetIsOnWithoutNotify(isHandTrackingActive);
         }
         if (HandTrackingMarker != null)
         {
             HandTrackingMarker.SetActive(isTrackersEnabled);
-            LandmarkToggle.isOn = isTrackersEnabled;
+            LandmarkToggle.SetIsOnWithoutNotify(isTrackersEnabled);
         }
         if (PanelBG != null)
         {
-            PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.3f);
-            CameraToggle.isOn = !isBackgroundEnabled;
+            PanelBG.color = isBackgroundEnabled ? new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f) : new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 0.7f);
+            CameraToggle.SetIsOnWithoutNotify(!isBackgroundEnabled);
         }
 
         ActivateCameraSettings();
+    }
+
+    void LoadModuleSettings()
+    {
+        isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
+        isTrackersEnabled = PlayerPrefs.GetInt("Trackers", 0) == 1;
+        isBackgroundEnabled = PlayerPrefs.GetInt("Background", 0) == 1;
     }
 
     public void LoadMainMenu() => SceneManager.LoadScene("Main Menu");
@@ -107,14 +108,14 @@ public class PauseMenu : MonoBehaviour
         else
         {
             CameraToggle.interactable = false;
-            CameraToggle.isOn = false;
+            CameraToggle.SetIsOnWithoutNotify(false);
             isBackgroundEnabled = true;
             PanelBG.color = new Color(PanelBG.color.r, PanelBG.color.g, PanelBG.color.b, 1f);
             PlayerPrefs.SetInt("Trackers", isTrackersEnabled ? 1 : 0);
             PlayerPrefs.Save();
 
             LandmarkToggle.interactable = false;
-            LandmarkToggle.isOn = false;
+            LandmarkToggle.SetIsOnWithoutNotify(false);
             isTrackersEnabled = false;
             HandTrackingMarker.SetActive(isTrackersEnabled);
             PlayerPrefs.SetInt("Background", isBackgroundEnabled ? 1 : 0);
