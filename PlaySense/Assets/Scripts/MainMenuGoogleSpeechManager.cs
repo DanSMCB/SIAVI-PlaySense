@@ -27,6 +27,10 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
     private string microphoneDevice;
     private const int sampleRate = 44100;
 
+    // Track state so we only try to end if recording started
+    private bool microphoneActive = false;
+    private Coroutine listeningCoroutine;
+
     void Awake()
     {
         bool voiceEnabled = PlayerPrefs.GetInt("VoiceMode", 0) == 1;
@@ -41,13 +45,22 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         if (isListening)
         {
             if (speechToTextOutput != null) speechToTextOutput.enabled = true;
-            StartCoroutine(ListenContinuously());
+
+            // Start listening only if not already started
+            if (listeningCoroutine == null)
+            {
+                listeningCoroutine = StartCoroutine(ListenContinuously());
+            }
             Debug.Log("[Speech] Voice mode ON");
         }
         else
         {
-            Microphone.End(microphoneDevice);
-            StopAllCoroutines();
+            SafeStopMicrophone();
+            if (listeningCoroutine != null)
+            {
+                StopCoroutine(listeningCoroutine);
+                listeningCoroutine = null;
+            }
             if (speechToTextOutput != null) speechToTextOutput.enabled = false;
             Debug.Log("[Speech] Voice mode OFF");
         }
@@ -64,22 +77,29 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
 
             yield return new WaitForSeconds(0.2f);
         }
+        listeningCoroutine = null;
     }
 
     IEnumerator WaitForSpeech()
     {
         if (speechToTextOutput != null) speechToTextOutput.text = "🎤 ...";
 
-        if (Microphone.devices.Length == 0) yield break;
+        if (Microphone.devices.Length == 0)
+        {
+            Debug.LogError("[Speech] Nenhum microfone encontrado.");
+            yield break;
+        }
 
         microphoneDevice = Microphone.devices[0];
 
         // Grava já em loop com buffer grande — não perde o início
         recordedClip = Microphone.Start(microphoneDevice, true, (int)maxRecordingSeconds, sampleRate);
+        microphoneActive = true;
 
         while (isListening)
         {
             yield return new WaitForSeconds(0.1f);
+
             if (GetCurrentVolume() > silenceThreshold)
             {
                 Debug.Log("[Speech] Voz detetada!");
@@ -90,11 +110,15 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
 
     IEnumerator RecordUntilSilence()
     {
-        // NÃO paras o microfone — continuas a gravar no mesmo clip
+        // Clip must be valid and mic must be running
+        if (Microphone.devices.Length == 0 || string.IsNullOrEmpty(microphoneDevice) || recordedClip == null)
+        {
+            Debug.LogError("[Speech] Microfone indisponível na gravação.");
+            yield break;
+        }
         if (speechToTextOutput != null) speechToTextOutput.text = "🎤 A ouvir...";
         Debug.Log("[Speech] A gravar fala...");
 
-        // Marca onde começou a fala (com 0.3s de buffer antes)
         int startPos = Mathf.Max(0, Microphone.GetPosition(microphoneDevice) - (int)(sampleRate * 0.3f));
 
         float silenceTimer = 0f;
@@ -115,9 +139,8 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
             {
                 Debug.Log($"[Speech] Fim de fala — silêncio: {silenceTimer:F1}s | total: {recordingTimer:F1}s");
 
-                // Para o microfone e extrai só a parte com fala
                 int endPos = Microphone.GetPosition(microphoneDevice);
-                Microphone.End(microphoneDevice);
+                SafeStopMicrophone();
 
                 ExtractAndSend(startPos, endPos);
                 yield break;
@@ -125,12 +148,31 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         }
     }
 
+    // New: Only end microphone if we have started it safely!
+    void SafeStopMicrophone()
+    {
+        if (microphoneActive && Microphone.devices.Length > 0)
+        {
+            try
+            {
+                Microphone.End(microphoneDevice);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("[Speech] Failed to end microphone: " + ex.Message);
+            }
+        }
+        microphoneActive = false;
+    }
+
     void ExtractAndSend(int startPos, int endPos)
     {
+        if (recordedClip == null) return;
+
         int clipLen = recordedClip.samples;
         int length = endPos > startPos
             ? endPos - startPos
-            : (clipLen - startPos) + endPos; // wrap-around do buffer circular
+            : (clipLen - startPos) + endPos;
 
         if (length <= 0) return;
 
@@ -156,17 +198,24 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         trimmed.SetData(samples, 0);
 
         // DEBUG — guarda o WAV para ouvires
-        byte[] debugWav = WavUtility.FromAudioClip(trimmed);
-        string path = Application.persistentDataPath + "/debug_audio.wav";
-        System.IO.File.WriteAllBytes(path, debugWav);
-        Debug.Log($"[Speech] WAV guardado em: {path}");
+        try
+        {
+            byte[] debugWav = WavUtility.FromAudioClip(trimmed);
+            string path = Application.persistentDataPath + "/debug_audio.wav";
+            System.IO.File.WriteAllBytes(path, debugWav);
+            Debug.Log($"[Speech] WAV guardado em: {path}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[Speech] Fail to write debug wav: " + ex.Message);
+        }
 
         StartCoroutine(SendAudioToSpeechToText(trimmed));
     }
 
     float GetCurrentVolume()
     {
-        if (recordedClip == null) return 0f;
+        if (recordedClip == null || string.IsNullOrEmpty(microphoneDevice)) return 0f;
 
         int pos = Microphone.GetPosition(microphoneDevice);
         if (pos <= 0) return 0f;
@@ -188,16 +237,12 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         return max;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // TRANSCRIÇÃO
-    // ─────────────────────────────────────────────────────────────
-
     public void StopRecordingAndTranscribe()
     {
-        if (recordedClip == null) return;
+        if (recordedClip == null || string.IsNullOrEmpty(microphoneDevice)) return;
 
         int position = Microphone.GetPosition(microphoneDevice);
-        Microphone.End(microphoneDevice);
+        SafeStopMicrophone();
 
         if (position <= 0)
         {
@@ -208,36 +253,24 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         float[] samples = new float[position * recordedClip.channels];
         recordedClip.GetData(samples, 0);
 
-        // Amplificação
-        float maxVolume = 0;
-        for (int i = 0; i < samples.Length; i++)
-        {
-            float abs = Mathf.Abs(samples[i]);
-            if (abs > maxVolume) maxVolume = abs;
-        }
-
-        //if (maxVolume > 0 && maxVolume < 0.5f)
-        //{
-        //    float multiplier = 0.9f / maxVolume;
-        //    for (int i = 0; i < samples.Length; i++) samples[i] *= multiplier;
-        //    Debug.Log($"[Speech] Amplificado {multiplier:F1}x");
-        //}
-
         AudioClip trimmedClip = AudioClip.Create("trimmed", position, recordedClip.channels, sampleRate, false);
         trimmedClip.SetData(samples, 0);
 
         // DEBUG — guarda o WAV para ouvires
-        byte[] debugWav = WavUtility.FromAudioClip(trimmedClip);
-        string path = Application.persistentDataPath + "/debug_audio.wav";
-        System.IO.File.WriteAllBytes(path, debugWav);
-        Debug.Log($"[Speech] WAV guardado em: {path}");
+        try
+        {
+            byte[] debugWav = WavUtility.FromAudioClip(trimmedClip);
+            string path = Application.persistentDataPath + "/debug_audio.wav";
+            System.IO.File.WriteAllBytes(path, debugWav);
+            Debug.Log($"[Speech] WAV guardado em: {path}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[Speech] Fail to write debug wav: " + ex.Message);
+        }
 
         StartCoroutine(SendAudioToSpeechToText(trimmedClip));
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // ENVIO PARA API
-    // ─────────────────────────────────────────────────────────────
 
     IEnumerator SendAudioToSpeechToText(AudioClip clip)
     {
@@ -291,10 +324,6 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // INTERPRETAÇÃO — navegação do menu principal
-    // ─────────────────────────────────────────────────────────────
-
     void HandleVoiceCommand(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
@@ -323,9 +352,16 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // CLASSES SERIALIZÁVEIS
-    // ─────────────────────────────────────────────────────────────
+    // Clean up microphone and coroutines if object is destroyed (scene change)
+    void OnDestroy()
+    {
+        SafeStopMicrophone();
+        if (listeningCoroutine != null)
+        {
+            StopCoroutine(listeningCoroutine);
+            listeningCoroutine = null;
+        }
+    }
 
     [Serializable] public class SpeechToTextRequest { public RecognitionConfig config; public RecognitionAudio audio; }
     [Serializable] public class RecognitionConfig { public string encoding; public int sampleRateHertz; public string languageCode; }
