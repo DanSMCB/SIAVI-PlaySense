@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class ReactionUIManager : MonoBehaviour
 {
@@ -81,11 +82,7 @@ public class ReactionUIManager : MonoBehaviour
 
     void OnClickQuit()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        SceneManager.LoadScene("Scenes/Main Menu");
     }
 
     void OnClickPlayAgain()

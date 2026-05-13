@@ -31,11 +31,28 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
     private bool microphoneActive = false;
     private Coroutine listeningCoroutine;
 
-    void Awake()
+    void OnEnable()
     {
         bool voiceEnabled = PlayerPrefs.GetInt("VoiceMode", 0) == 1;
-        Debug.Log($"[Speech] VoiceMode ao iniciar: {voiceEnabled}");
-        if (voiceEnabled) ToggleVoiceMode();
+        Debug.Log($"[Speech] OnEnable — VoiceMode: {voiceEnabled}");
+
+        if (voiceEnabled && !isListening)
+            ToggleVoiceMode();
+    }
+
+    void OnDisable()
+    {
+        if (isListening)
+        {
+            isListening = false;
+            SafeStopMicrophone();
+            recordedClip = null;
+            if (listeningCoroutine != null)
+            {
+                StopCoroutine(listeningCoroutine);
+                listeningCoroutine = null;
+            }
+        }
     }
 
     public void ToggleVoiceMode()
@@ -46,21 +63,30 @@ public class MainMenuGoogleSpeechManager : MonoBehaviour
         {
             if (speechToTextOutput != null) speechToTextOutput.enabled = true;
 
-            // Start listening only if not already started
-            if (listeningCoroutine == null)
-            {
-                listeningCoroutine = StartCoroutine(ListenContinuously());
-            }
-            Debug.Log("[Speech] Voice mode ON");
-        }
-        else
-        {
+            // Garante que o microfone está limpo antes de começar
             SafeStopMicrophone();
+            recordedClip = null;
+
             if (listeningCoroutine != null)
             {
                 StopCoroutine(listeningCoroutine);
                 listeningCoroutine = null;
             }
+
+            listeningCoroutine = StartCoroutine(ListenContinuously());
+            Debug.Log("[Speech] Voice mode ON");
+        }
+        else
+        {
+            SafeStopMicrophone();
+            recordedClip = null;
+
+            if (listeningCoroutine != null)
+            {
+                StopCoroutine(listeningCoroutine);
+                listeningCoroutine = null;
+            }
+
             if (speechToTextOutput != null) speechToTextOutput.enabled = false;
             Debug.Log("[Speech] Voice mode OFF");
         }

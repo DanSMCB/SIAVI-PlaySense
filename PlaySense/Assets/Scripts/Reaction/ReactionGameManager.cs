@@ -175,11 +175,6 @@ public class ReactionGameManager : MonoBehaviour
         }
     }
 
-    public void GoBack()
-    {
-        SceneManager.LoadScene("Main Menu");
-    }
-
     public void StartLevel(int level)
     {
         CurrentLevel = level;

@@ -2633,7 +2633,7 @@ MonoBehaviour:
   screen: {fileID: 1034706673}
   runningMode: 0
   _handLandmarkerResultAnnotationController: {fileID: 1034706674}
-  _uiInputBridge: {fileID: 1639886924}
+  _uiInputBridge: {fileID: 0}
   _paddleInputBridge: {fileID: 913070969}
   handCursor: {fileID: 0}
 --- !u!4 &801670153
@@ -7330,7 +7330,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 410, y: -85.37}
+  m_AnchoredPosition: {x: 410, y: -85.369995}
   m_SizeDelta: {x: 680, y: 70.740005}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2046168693
