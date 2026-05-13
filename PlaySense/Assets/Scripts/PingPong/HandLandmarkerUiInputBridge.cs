@@ -14,6 +14,9 @@ public class HandLandmarkerUiInputBridge : MonoBehaviour
     [SerializeField] private int _handIndex = 0;            // 0 = first hand
     [SerializeField] private int _pointerLandmarkIndex = 8; // IndexFingerTip
     [SerializeField] private int _thumbTipIndex = 4;        // ThumbTip
+    [SerializeField] private int _IndexBaseIndex = 5;      // Index base
+    [SerializeField] private int _pinkyBaseIndex = 17;      // Pinky base
+    [SerializeField] private int _wristIndex = 0;           // Wrist
 
     [Header("Pinch")]
     [Tooltip("Pinch when distance(thumbTip, indexTip) is below this threshold (normalized landmark units).")]
@@ -28,6 +31,9 @@ public class HandLandmarkerUiInputBridge : MonoBehaviour
     private bool _hasSample;
     private Vector3 _latestIndexTip; // normalized x,y,z
     private Vector3 _latestThumbTip; // normalized x,y,z
+    private Vector3 _latestWrist; // normalized x,y,z
+    private Vector3 _latestIndexBase; // normalized x,y,z
+    private Vector3 _latestPinkyBase; // normalized x,y,z
 
     // main-thread state
     private Vector2 _smoothedScreenPos;
@@ -53,10 +59,19 @@ public class HandLandmarkerUiInputBridge : MonoBehaviour
         var indexTip = lms[_pointerLandmarkIndex];
         var thumbTip = lms[_thumbTipIndex];
 
+        var wrist = lms[_wristIndex];
+        var indexBase = lms[_IndexBaseIndex];
+        var pinkyBase = lms[_pinkyBaseIndex];
+
         lock (_lock)
         {
             _latestIndexTip = new Vector3(indexTip.x, indexTip.y, indexTip.z);
             _latestThumbTip = new Vector3(thumbTip.x, thumbTip.y, thumbTip.z);
+
+            _latestWrist = new Vector3(wrist.x, wrist.y, wrist.z);
+            _latestIndexBase = new Vector3(indexBase.x, indexBase.y, indexBase.z);
+            _latestPinkyBase = new Vector3(pinkyBase.x, pinkyBase.y, pinkyBase.z);
+
             _hasSample = true;
         }
     }
@@ -66,21 +81,30 @@ public class HandLandmarkerUiInputBridge : MonoBehaviour
         if (_uiPointer == null) return;
 
         Vector3 indexTip, thumbTip;
+        Vector3 wrist, indexBase, pinkyBase;
         bool hasSample;
 
         lock (_lock)
         {
             hasSample = _hasSample;
+
             indexTip = _latestIndexTip;
             thumbTip = _latestThumbTip;
+
+            wrist = _latestWrist;
+            indexBase = _latestIndexBase;
+            pinkyBase = _latestPinkyBase;
         }
 
         if (!hasSample) return;
 
         // Now we are on main thread: Unity APIs are OK.
+        float centerX = (wrist.x + indexBase.x + pinkyBase.x) / 3f;
+        float centerY = (wrist.y + indexBase.y + pinkyBase.y) / 3f;
+
         var screenPos = new Vector2(
-          indexTip.x * Screen.width,
-          (1f - indexTip.y) * Screen.height
+            centerX * Screen.width,
+            (1f - centerY) * Screen.height
         );
 
         if (_smoothing > 0f)

@@ -1,4 +1,5 @@
 using Mediapipe.Unity.Sample.HandLandmarkDetection;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -6,8 +7,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public HandLandmarkerRunner handRunner;
+    //public HandLandmarkerDualUiBridge bridge;
     public GameObject handTrack;
-    public GameObject handCursor;
 
     public int player1Wins;
     public int player2Wins;
@@ -15,19 +16,50 @@ public class GameManager : MonoBehaviour
 
     bool handTracking = false;
 
+    [SerializeField] private UnityEngine.UI.Toggle handTrackingToggle;
+    [SerializeField] private GameObject cursor1;
+    [SerializeField] private GameObject cursor2;
+
     void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    void Start()
+    {
+        handRunner = Object.FindFirstObjectByType<HandLandmarkerRunner>();
+        //bridge = FindFirstObjectByType<HandLandmarkerDualUiBridge>();
+
+        StartCoroutine(SetupHandTracking());
+    }
+
+    IEnumerator SetupHandTracking()
+    {
+        while (handRunner == null)
+        {
+            handRunner = Object.FindFirstObjectByType<HandLandmarkerRunner>();
+            yield return null;
+        }
+
+        yield return null;
+
+        if (PlayerPrefs.GetInt("HandTracking", 0) == 1)
+        {
+            handTrackingToggle.isOn = true;
+            handTracking = true;
+            handRunner.Play();
         }
         else
         {
-            Destroy(gameObject);
+            handRunner.Stop();
         }
-
-        handCursor.SetActive(false);
     }
 
     public void AddWin(int player)
@@ -43,21 +75,21 @@ public class GameManager : MonoBehaviour
 
     public void ToggleHandTracking()
     {
-        handTrack.SetActive(true);
-
         handTracking = !handTracking;
 
         if (handTracking)
         {
-            handCursor.SetActive(true);
+            //bridge.enabled = true;
+            cursor1.SetActive(true);
+            cursor2.SetActive(true);
             handRunner.Play();
         }
         else
         {
-            handCursor.SetActive(false);
+            //bridge.enabled = false;
+            cursor1.SetActive(false);
+            cursor2.SetActive(false);
             handRunner.Stop();
         }
-
-        
     }
 }

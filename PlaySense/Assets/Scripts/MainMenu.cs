@@ -1,6 +1,7 @@
+using Mediapipe.Unity.Sample.HandLandmarkDetection;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class MainMenu : MonoBehaviour
     public Toggle CameraToggle;
     public Toggle LandmarkToggle;
     public Toggle VoiceToggle;
+
+    public HandLandmarkerRunner handRunner;
 
     void Start()
     {
@@ -42,7 +45,30 @@ public class MainMenu : MonoBehaviour
             VoiceToggle.SetIsOnWithoutNotify(isSpeechEnabled);
         }
 
+        if (handRunner != null)
+        {
+            StartCoroutine(InitHandRunner());
+        }
+
         ActivateCameraSettings();
+    }
+
+
+
+    private System.Collections.IEnumerator InitHandRunner()
+    {
+        yield return null;
+
+        bool enabled = PlayerPrefs.GetInt("HandTracking", 0) == 1;
+
+        if (!enabled)
+        {
+            handRunner.Stop();
+        }
+        else
+        {
+            handRunner.Play();
+        }
     }
 
     void LoadModuleSettings()
@@ -65,7 +91,10 @@ public class MainMenu : MonoBehaviour
         PlayerPrefs.Save();
         if (HandTrackingObject != null)
         {
-            HandTrackingObject.SetActive(isHandTrackingActive);
+            if (isHandTrackingActive)
+                handRunner.Play();
+            else
+                handRunner.Stop();
         }
         ActivateCameraSettings();
     }

@@ -14,6 +14,9 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
     [SerializeField] private float _pinchDistanceThreshold = 0.05f;
     [Range(0f, 1f)][SerializeField] private float _smoothing = 0.2f;
 
+    private bool _leftVisible;
+    private bool _rightVisible;
+
     private readonly object _lock = new object();
 
     // Classe interna para guardar os dados
@@ -21,6 +24,9 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
     {
         public Vector3 indexTip;
         public Vector3 thumbTip;
+        public Vector3 indexBase;
+        public Vector3 pinkyBase;
+        public Vector3 wrist;
         public bool hasSample;
     }
 
@@ -32,7 +38,11 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
 
     public void OnHandResult(HandLandmarkerResult result)
     {
-        if (result.handLandmarks == null || result.handedness == null) return;
+        if (result.handLandmarks == null || result.handedness == null)
+            return;
+
+        bool leftDetected = false;
+        bool rightDetected = false;
 
         lock (_lock)
         {
@@ -42,23 +52,43 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
             for (int i = 0; i < result.handLandmarks.Count; i++)
             {
                 var lms = result.handLandmarks[i].landmarks;
-                if (lms == null || lms.Count < 9) continue;
+                if (lms == null || lms.Count < 21) continue;
 
                 string label = result.handedness[i].categories[0].categoryName.ToLower();
                 bool isLeft = label.Contains("left");
 
-                // CORREÇÃO AQUI: Mudado de HandSample para HandData
                 HandData target = isLeft ? _leftData : _rightData;
+
+                var wrist = lms[0];
+                var indexBase = lms[5];
+                var pinkyBase = lms[17];
 
                 target.indexTip = new Vector3(lms[8].x, lms[8].y, lms[8].z);
                 target.thumbTip = new Vector3(lms[4].x, lms[4].y, lms[4].z);
+
+                target.wrist = new Vector3(wrist.x, wrist.y, wrist.z);
+                target.indexBase = new Vector3(indexBase.x, indexBase.y, indexBase.z);
+                target.pinkyBase = new Vector3(pinkyBase.x, pinkyBase.y, pinkyBase.z);
+
                 target.hasSample = true;
+
+                if (isLeft) leftDetected = true;
+                else rightDetected = true;
             }
         }
+
+        _leftVisible = leftDetected;
+        _rightVisible = rightDetected;
     }
 
     private void Update()
     {
+        if (_leftHandPointer != null)
+            _leftHandPointer.gameObject.SetActive(_leftVisible);
+
+        if (_rightHandPointer != null)
+            _rightHandPointer.gameObject.SetActive(_rightVisible);
+
         ProcessHand(_leftData, _leftHandPointer, ref _smoothedLeftPos);
         ProcessHand(_rightData, _rightHandPointer, ref _smoothedRightPos);
     }
@@ -68,15 +98,20 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
         // Se não houver amostra (mão não detectada), não fazemos nada
         if (pointer == null || !data.hasSample) return;
 
-        Vector3 iTip, tTip;
+        Vector3 iTip, tTip, iBase, pBase, wrist;
         lock (_lock)
         {
             iTip = data.indexTip;
             tTip = data.thumbTip;
+            iBase = data.indexBase;
+            pBase = data.pinkyBase;
+            wrist = data.wrist;
         }
 
         // Converter para coordenadas de ecrã (Inverter Y porque MediaPipe 0 é topo)
-        Vector2 screenPos = new Vector2(iTip.x * Screen.width, (1f - iTip.y) * Screen.height);
+        float centerX =data.wrist.x * 0.5f + data.indexBase.x * 0.25f + data.pinkyBase.x * 0.25f;
+        float centerY = data.wrist.y * 0.5f + data.indexBase.y * 0.25f + data.pinkyBase.y * 0.25f;
+        Vector2 screenPos = new Vector2(centerX * Screen.width, (1f - centerY) * Screen.height);
 
         // Smoothing (Suavização)
         if (_smoothing > 0f)
