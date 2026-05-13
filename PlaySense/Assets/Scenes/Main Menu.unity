@@ -5127,7 +5127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   annotation: {fileID: 1405716636}
-  _visualizeZ: 0
+  _visualizeZ: 1
 --- !u!114 &1923061136 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2020366215714292840, guid: 5713b959e3c77a58fb258133fc8e4aef, type: 3}
@@ -5643,6 +5643,7 @@ MonoBehaviour:
   LandmarkToggle: {fileID: 1094531672}
   VoiceToggle: {fileID: 1847255540}
   handRunner: {fileID: 1483478394}
+  cursorCanvas: {fileID: 1214428511}
 --- !u!4 &1993434730
 Transform:
   m_ObjectHideFlags: 0

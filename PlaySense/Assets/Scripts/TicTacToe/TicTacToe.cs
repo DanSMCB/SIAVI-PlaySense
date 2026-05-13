@@ -1,5 +1,6 @@
 using Mediapipe.Unity.Sample.HandLandmarkDetection;
-using System;
+using NUnit.Framework;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,11 +26,65 @@ public class TicTacToe : MonoBehaviour
     public Button[] buttons;
     private int[] board = new int[9];
 
+    public HandLandmarkerRunner handRunner;
+    [SerializeField] private UnityEngine.UI.Toggle handTrackingToggle;
+    [SerializeField] private Image cursor1;
+    [SerializeField] private Image cursor2;
+
+    bool handTracking = false;
+
     void Start()
     {
         player1NoWins.text = GameManager.Instance.player1Wins.ToString();
         player2NoWins.text = GameManager.Instance.player2Wins.ToString();
         NoDraws.text = GameManager.Instance.draws.ToString();
+
+        handRunner = Object.FindFirstObjectByType<HandLandmarkerRunner>();
+        StartCoroutine(SetupHandTracking());
+    }
+
+    IEnumerator SetupHandTracking()
+    {
+        while (handRunner == null)
+        {
+            handRunner = Object.FindFirstObjectByType<HandLandmarkerRunner>();
+            yield return null;
+        }
+
+        yield return null;
+
+        if (PlayerPrefs.GetInt("HandTracking", 0) == 1)
+        {
+            handTrackingToggle.isOn = true;
+            handTracking = true;
+            cursor1.enabled = true;
+            cursor2.enabled = true;
+            handRunner.Play();
+        }
+        else
+        {
+            cursor1.enabled = false;
+            cursor2.enabled = false;
+            handRunner.Stop();
+        }
+    }
+
+    public void ToggleHandTracking()
+    {
+        handTracking = !handTracking;
+
+        if (handTracking)
+        {
+            cursor1.enabled = true;
+            cursor2.enabled = true;
+            handRunner.Play();
+        }
+        else
+        {
+            cursor1.enabled = false;
+            cursor2.enabled = false;
+            handRunner.Stop();
+        }
     }
 
     public void Play(int index)

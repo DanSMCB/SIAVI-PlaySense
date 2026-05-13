@@ -6,6 +6,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 
 public class GoogleSpeechManager : MonoBehaviour
 {
@@ -27,17 +28,48 @@ public class GoogleSpeechManager : MonoBehaviour
     private const int sampleRate = 16000;
     private const int maxRecordingSeconds = 2;
 
+    [SerializeField] private UnityEngine.UI.Toggle voiceToggle;
+    public GameObject[] boardNumbers;
+
+    private void Start()
+    {
+        if (PlayerPrefs.GetInt("VoiceMode", 0) == 1)
+        {
+            voiceToggle.isOn = true;
+            foreach (var num in boardNumbers)
+            {
+                num.SetActive(true);
+            }
+            speechToTextOutput.enabled = true;
+            StartRecording();
+        }
+        else {
+            foreach (var num in boardNumbers)
+            {
+                num.SetActive(false);
+            }
+        }
+    }
+
     public void ToggleVoiceMode()
     {
         isListening = !isListening;
 
         if (isListening)
         {
+            foreach (var num in boardNumbers)
+            {
+                num.SetActive(true);
+            }
             speechToTextOutput.enabled = true;
             StartRecording();
         }
         else
         {
+            foreach (var num in boardNumbers)
+            {
+                num.SetActive(false);
+            }
             Microphone.End(null);
             StopAllCoroutines();
             Debug.Log("Voice mode desligado");

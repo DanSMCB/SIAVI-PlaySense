@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Mediapipe.Tasks.Vision.HandLandmarker;
-using mptcc = Mediapipe.Tasks.Components.Containers;
+using System;
+using UnityEngine;
 
 public class HandLandmarkerDualUiBridge : MonoBehaviour
 {
@@ -12,14 +10,12 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private float _pinchDistanceThreshold = 0.05f;
-    [Range(0f, 1f)][SerializeField] private float _smoothing = 0.2f;
 
-    private bool _leftVisible;
-    private bool _rightVisible;
+    [Range(0f, 1f)]
+    [SerializeField] private float _smoothing = 0.2f;
 
-    private readonly object _lock = new object();
+    [SerializeField] private int _maxMissingFrames = 5;
 
-    // Classe interna para guardar os dados
     private class HandData
     {
         public Vector3 indexTip;
@@ -30,103 +26,102 @@ public class HandLandmarkerDualUiBridge : MonoBehaviour
         public bool hasSample;
     }
 
-    private HandData _leftData = new HandData();
-    private HandData _rightData = new HandData();
+    private HandData _handA = new HandData();
+    private HandData _handB = new HandData();
 
-    private Vector2 _smoothedLeftPos;
-    private Vector2 _smoothedRightPos;
+    private Vector2 _smoothedA;
+    private Vector2 _smoothedB;
+
+    private int _aMissingFrames;
+    private int _bMissingFrames;
+
+    private readonly object _lock = new object();
 
     public void OnHandResult(HandLandmarkerResult result)
     {
-        if (result.handLandmarks == null || result.handedness == null)
+        if (result.handLandmarks == null)
             return;
-
-        bool leftDetected = false;
-        bool rightDetected = false;
 
         lock (_lock)
         {
-            _leftData.hasSample = false;
-            _rightData.hasSample = false;
+            _handA.hasSample = false;
+            _handB.hasSample = false;
+
+            int assigned = 0;
 
             for (int i = 0; i < result.handLandmarks.Count; i++)
             {
                 var lms = result.handLandmarks[i].landmarks;
                 if (lms == null || lms.Count < 21) continue;
 
-                string label = result.handedness[i].categories[0].categoryName.ToLower();
-                bool isLeft = label.Contains("left");
+                var data = new HandData
+                {
+                    indexTip = new Vector3(lms[8].x, lms[8].y, lms[8].z),
+                    thumbTip = new Vector3(lms[4].x, lms[4].y, lms[4].z),
+                    wrist = new Vector3(lms[0].x, lms[0].y, lms[0].z),
+                    indexBase = new Vector3(lms[5].x, lms[5].y, lms[5].z),
+                    pinkyBase = new Vector3(lms[17].x, lms[17].y, lms[17].z),
+                    hasSample = true
+                };
 
-                HandData target = isLeft ? _leftData : _rightData;
-
-                var wrist = lms[0];
-                var indexBase = lms[5];
-                var pinkyBase = lms[17];
-
-                target.indexTip = new Vector3(lms[8].x, lms[8].y, lms[8].z);
-                target.thumbTip = new Vector3(lms[4].x, lms[4].y, lms[4].z);
-
-                target.wrist = new Vector3(wrist.x, wrist.y, wrist.z);
-                target.indexBase = new Vector3(indexBase.x, indexBase.y, indexBase.z);
-                target.pinkyBase = new Vector3(pinkyBase.x, pinkyBase.y, pinkyBase.z);
-
-                target.hasSample = true;
-
-                if (isLeft) leftDetected = true;
-                else rightDetected = true;
+                if (assigned == 0)
+                {
+                    _handA = data;
+                    assigned++;
+                }
+                else
+                {
+                    _handB = data;
+                    assigned++;
+                }
             }
         }
-
-        _leftVisible = leftDetected;
-        _rightVisible = rightDetected;
     }
 
     private void Update()
     {
-        if (_leftHandPointer != null)
-            _leftHandPointer.gameObject.SetActive(_leftVisible);
+        UpdateVisibility(_handA, ref _aMissingFrames, _leftHandPointer);
+        UpdateVisibility(_handB, ref _bMissingFrames, _rightHandPointer);
 
-        if (_rightHandPointer != null)
-            _rightHandPointer.gameObject.SetActive(_rightVisible);
+        ProcessHand(_handA, _leftHandPointer, ref _smoothedA);
+        ProcessHand(_handB, _rightHandPointer, ref _smoothedB);
+    }
 
-        ProcessHand(_leftData, _leftHandPointer, ref _smoothedLeftPos);
-        ProcessHand(_rightData, _rightHandPointer, ref _smoothedRightPos);
+    private void UpdateVisibility(HandData hand, ref int missingFrames, HandUiPointerClicker pointer)
+    {
+        if (hand.hasSample)
+            missingFrames = 0;
+        else
+            missingFrames++;
+
+        bool visible = missingFrames < _maxMissingFrames;
+
+        if (pointer != null)
+        {
+            var img = pointer.GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+                img.enabled = visible;
+        }
     }
 
     private void ProcessHand(HandData data, HandUiPointerClicker pointer, ref Vector2 smoothedPos)
     {
-        // Se não houver amostra (mão não detectada), não fazemos nada
-        if (pointer == null || !data.hasSample) return;
+        if (pointer == null || !data.hasSample)
+            return;
 
-        Vector3 iTip, tTip, iBase, pBase, wrist;
-        lock (_lock)
-        {
-            iTip = data.indexTip;
-            tTip = data.thumbTip;
-            iBase = data.indexBase;
-            pBase = data.pinkyBase;
-            wrist = data.wrist;
-        }
+        float centerX = (data.wrist.x * 0.5f + data.indexBase.x * 0.25f + data.pinkyBase.x * 0.25f);
+        float centerY = (data.wrist.y * 0.5f + data.indexBase.y * 0.25f + data.pinkyBase.y * 0.25f);
 
-        // Converter para coordenadas de ecrã (Inverter Y porque MediaPipe 0 é topo)
-        float centerX =data.wrist.x * 0.5f + data.indexBase.x * 0.25f + data.pinkyBase.x * 0.25f;
-        float centerY = data.wrist.y * 0.5f + data.indexBase.y * 0.25f + data.pinkyBase.y * 0.25f;
-        Vector2 screenPos = new Vector2(centerX * Screen.width, (1f - centerY) * Screen.height);
+        Vector2 screenPos = new Vector2(
+            centerX * Screen.width,
+            (1f - centerY) * Screen.height
+        );
 
-        // Smoothing (Suavização)
-        if (_smoothing > 0f)
-        {
-            float t = 1f - Mathf.Pow(1f - _smoothing, Time.deltaTime * 60f);
-            smoothedPos = Vector2.Lerp(smoothedPos, screenPos, t);
-        }
-        else
-        {
-            smoothedPos = screenPos;
-        }
+        float t = 1f - Mathf.Pow(1f - _smoothing, Time.deltaTime * 60f);
+        smoothedPos = Vector2.Lerp(smoothedPos, screenPos, t);
 
-        bool isPinching = Vector3.Distance(iTip, tTip) < _pinchDistanceThreshold;
+        bool isPinching = Vector3.Distance(data.indexTip, data.thumbTip) < _pinchDistanceThreshold;
 
-        // Envia os dados para o cursor visual
         pointer.UpdatePointer(smoothedPos, isPinching);
     }
 }

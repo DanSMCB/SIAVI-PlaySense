@@ -19,6 +19,7 @@ public class MainMenu : MonoBehaviour
     public Toggle VoiceToggle;
 
     public HandLandmarkerRunner handRunner;
+    [SerializeField] private GameObject cursorCanvas;
 
     void Start()
     {
@@ -53,8 +54,6 @@ public class MainMenu : MonoBehaviour
         ActivateCameraSettings();
     }
 
-
-
     private System.Collections.IEnumerator InitHandRunner()
     {
         yield return null;
@@ -63,11 +62,21 @@ public class MainMenu : MonoBehaviour
 
         if (!enabled)
         {
+            cursorCanvas.SetActive(false);
             handRunner.Stop();
         }
         else
         {
+            cursorCanvas.SetActive(true);
             handRunner.Play();
+        }
+    }
+
+    void SetCursorVisible(GameObject cursor, bool visible)
+    {
+        foreach (var img in cursor.GetComponentsInChildren<Image>(true))
+        {
+            img.enabled = visible;
         }
     }
 
@@ -92,9 +101,16 @@ public class MainMenu : MonoBehaviour
         if (HandTrackingObject != null)
         {
             if (isHandTrackingActive)
+            {
+                cursorCanvas.SetActive(true);
                 handRunner.Play();
-            else
+            }
+
+            else { 
+                cursorCanvas.SetActive(false);
                 handRunner.Stop();
+            }
+                
         }
         ActivateCameraSettings();
     }
