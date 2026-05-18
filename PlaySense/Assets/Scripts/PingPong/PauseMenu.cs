@@ -16,6 +16,7 @@ public class PauseMenu : MonoBehaviour
 
     public GameObject MenuObject;
     public GameObject WinScreen;
+    public GameObject ColoursMenu;
     public HandPaddleInputBridge HandPaddleInputBridge;
 
     void Start()
@@ -53,6 +54,7 @@ public class PauseMenu : MonoBehaviour
     {
         MenuObject.SetActive(false);
         HandTrackingObject.SetActive(false);
+        ColoursMenu.SetActive(false);
         HandPaddleInputBridge.SetHandTrackingActive(isHandTrackingActive);
         HandPaddleInputBridge.ResetGame();
     }
@@ -62,6 +64,13 @@ public class PauseMenu : MonoBehaviour
         MenuObject.SetActive(true);
         HandTrackingObject.SetActive(isHandTrackingActive);
         WinScreen.SetActive(false);
+        ColoursMenu.SetActive(false);
+    }
+
+    public void OpenColoursMenu()
+    {
+        ColoursMenu.SetActive(true);
+        MenuObject.SetActive(false);
     }
 
     public void ToggleHandTracking()
