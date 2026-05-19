@@ -22,6 +22,10 @@ public class PaddleControl : MonoBehaviour
     [SerializeField] private InputMethodType _inputMethod = InputMethodType.HandTracking; // Default to hand tracking
     [SerializeField] private bool _movementEnabled = false;
 
+    // --- BOT ---
+    [Header("Bot")]
+    [SerializeField] private bool _botEnabled = false; // runtime-controlled by HandPaddleInputBridge
+
     private RectTransform _rectTransform;
 
     public InputMethodType InputMethod
@@ -29,12 +33,20 @@ public class PaddleControl : MonoBehaviour
         get => _inputMethod;
         set => _inputMethod = value;
     }
+
     public bool MovementEnabled
     {
         get => _movementEnabled;
         set => _movementEnabled = value;
     }
+
     public bool IsHandActive => _isHandActive;
+
+    public bool BotEnabled
+    {
+        get => _botEnabled;
+        set => _botEnabled = value;
+    }
 
     private void Awake()
     {
@@ -50,12 +62,32 @@ public class PaddleControl : MonoBehaviour
         if (!_movementEnabled || _rectTransform == null)
             return;
 
-        HandleKeyboard(); // Always handle
+        // If bot is enabled, DO NOT allow keyboard or hand tracking to affect this paddle.
+        if (_botEnabled)
+            return;
+
+        HandleKeyboard(); 
 
         if (_inputMethod == InputMethodType.HandTracking)
         {
-            HandleHandTracking(); // Optional, on top of keyboard
+            HandleHandTracking();
         }
+    }
+
+    public void BotStepToBallY(float ballY)
+    {
+        if (!_movementEnabled || _rectTransform == null)
+            return;
+
+        float currentY = _rectTransform.anchoredPosition.y;
+        float step = _keyboardSpeed * Time.deltaTime;
+        float newY = Mathf.MoveTowards(currentY, ballY, step);
+
+        newY = Mathf.Clamp(newY, _bottomBoundaryY, _topBoundaryY);
+
+        var pos = _rectTransform.anchoredPosition;
+        pos.y = newY;
+        _rectTransform.anchoredPosition = pos;
     }
 
     private void HandleHandTracking()
@@ -63,9 +95,20 @@ public class PaddleControl : MonoBehaviour
         if (_inputBridge == null)
             return;
 
-        var handState = _controlledHand == ControlledHand.Left
-            ? _inputBridge.LeftHand
-            : _inputBridge.RightHand;
+        HandPaddleInputBridge.HandState handState;
+
+        if (_controlledHand == ControlledHand.Left)
+        {
+            if (_inputBridge.BotModeActive && _inputBridge.RightHand.isActive)
+                handState = _inputBridge.RightHand;
+
+            else
+                handState = _inputBridge.LeftHand;
+        }
+        else
+        {
+            handState = _inputBridge.RightHand;
+        }
 
         _isHandActive = handState.isTracked;
 
@@ -101,6 +144,13 @@ public class PaddleControl : MonoBehaviour
                 input += 1f;
             if (Input.GetKey(KeyCode.DownArrow))
                 input -= 1f;
+            if (_inputBridge.BotModeActive)
+            {
+                if (Input.GetKey(KeyCode.W))
+                    input += 1f;
+                if (Input.GetKey(KeyCode.S))
+                    input -= 1f;
+            }
         }
 
         if (input != 0f)

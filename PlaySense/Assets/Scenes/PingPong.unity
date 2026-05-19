@@ -1111,6 +1111,7 @@ MonoBehaviour:
   _isHandActive: 0
   _inputMethod: 1
   _movementEnabled: 0
+  _botEnabled: 0
 --- !u!1 &141029386
 GameObject:
   m_ObjectHideFlags: 0
@@ -4105,6 +4106,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HandTrackingMarker: {fileID: 1034706672}
   HandTrackingObject: {fileID: 1639886919}
+  HandTrackingObject2: {fileID: 88650097}
   PanelBG: {fileID: 677473639}
   HandTrackingToggle: {fileID: 195867855}
   CameraToggle: {fileID: 1130605446}
@@ -6731,6 +6733,7 @@ MonoBehaviour:
   _isHandActive: 0
   _inputMethod: 1
   _movementEnabled: 0
+  _botEnabled: 0
 --- !u!1 &865150719
 GameObject:
   m_ObjectHideFlags: 0
@@ -7373,6 +7376,7 @@ MonoBehaviour:
   _winScreen: {fileID: 854114713}
   _winScreenText: {fileID: 489528285}
   _handTrackingCursor: {fileID: 1639886919}
+  _handTrackingCursor2: {fileID: 88650097}
   winGameValue: 3
   ballStartSpeed: 350
   ballSpeedIncrement: 60

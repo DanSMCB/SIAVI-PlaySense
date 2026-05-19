@@ -6,6 +6,7 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject HandTrackingMarker;
     public GameObject HandTrackingObject;
+    public GameObject HandTrackingObject2;
     public Image PanelBG;
     private bool isHandTrackingActive;
     private bool isTrackersEnabled;
@@ -28,6 +29,9 @@ public class PauseMenu : MonoBehaviour
             HandTrackingObject.SetActive(isHandTrackingActive);
             HandTrackingToggle.SetIsOnWithoutNotify(isHandTrackingActive);
         }
+        if (HandTrackingObject2 != null) {
+            HandTrackingObject2.SetActive(isHandTrackingActive);
+        }
         if (HandTrackingMarker != null)
         {
             HandTrackingMarker.SetActive(isTrackersEnabled);
@@ -42,6 +46,14 @@ public class PauseMenu : MonoBehaviour
         ActivateCameraSettings();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ReturnMenu();
+        }
+    }
+
     void LoadModuleSettings()
     {
         isHandTrackingActive = PlayerPrefs.GetInt("HandTracking", 0) == 1;
@@ -54,6 +66,7 @@ public class PauseMenu : MonoBehaviour
     {
         MenuObject.SetActive(false);
         HandTrackingObject.SetActive(false);
+        HandTrackingObject2.SetActive(false);
         ColoursMenu.SetActive(false);
         HandPaddleInputBridge.SetHandTrackingActive(isHandTrackingActive);
         HandPaddleInputBridge.ResetGame();
@@ -63,8 +76,10 @@ public class PauseMenu : MonoBehaviour
     {
         MenuObject.SetActive(true);
         HandTrackingObject.SetActive(isHandTrackingActive);
+        HandTrackingObject2.SetActive(isHandTrackingActive);
         WinScreen.SetActive(false);
         ColoursMenu.SetActive(false);
+        HandPaddleInputBridge.StopGame();
     }
 
     public void OpenColoursMenu()
@@ -81,6 +96,10 @@ public class PauseMenu : MonoBehaviour
         if (HandTrackingObject != null)
         {
             HandTrackingObject.SetActive(isHandTrackingActive);
+        }
+        if (HandTrackingObject2 != null)
+        {
+            HandTrackingObject2.SetActive(isHandTrackingActive);
         }
         ActivateCameraSettings();
     }

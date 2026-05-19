@@ -1,7 +1,8 @@
-using System;
-using UnityEngine;
-using TMPro; // For TextMeshProUGUI
 using Mediapipe.Tasks.Vision.HandLandmarker;
+using Mediapipe.Unity.Sample.HandLandmarkDetection;
+using System;
+using TMPro; // For TextMeshProUGUI
+using UnityEngine;
 
 public class HandPaddleInputBridge : MonoBehaviour
 {
@@ -66,7 +67,7 @@ public class HandPaddleInputBridge : MonoBehaviour
                     if (cls.categories != null && cls.categories.Count > 0)
                     {
                         var label = cls.categories[0].categoryName;
-                        isLeft = string.Equals(label, "Left", StringComparison.OrdinalIgnoreCase);
+                        isLeft = string.Equals(label, "Left", StringComparison.OrdinalIgnoreCase); // This is inverted. All the "Left" are actually the right hand, and vice versa. This is a quirk of the mediapipe handedness labeling.
                     }
                 }
 
@@ -116,6 +117,7 @@ public class HandPaddleInputBridge : MonoBehaviour
     [SerializeField] private GameObject _winScreen;
     [SerializeField] private TextMeshProUGUI _winScreenText;
     [SerializeField] private GameObject _handTrackingCursor;
+    [SerializeField] private GameObject _handTrackingCursor2;
 
     [Header("Pong Settings")]
     public int winGameValue = 3;
@@ -138,18 +140,42 @@ public class HandPaddleInputBridge : MonoBehaviour
     private bool _launchToLeftAfterScore = false;
     private bool _handTrackingActivated = false;
 
-    //void Start()
-    //{
-    //    ResetGame();
-    //}
+    private bool _botMode = false;
+    public bool BotModeActive => _botMode;
 
     void Update()
     {
         if (_ball == null || _leftPaddle == null || _rightPaddle == null || _gameOver) return;
+
+        UpdateBotModeFromRuntimeSettings();
+
+        // Drive bot paddle if enabled (right paddle only)
+        if (_leftPaddleControl != null && _leftPaddleControl.BotEnabled)
+        {
+            _leftPaddleControl.BotStepToBallY(_ball.anchoredPosition.y);
+        }
+
         PongGameUpdate();
     }
 
     #region === GAME LOGIC ===
+
+    private void UpdateBotModeFromRuntimeSettings()
+    {
+        bool botModeNow = HandLandmarkRuntimeSettings.NumHands == 1;
+
+        // Only apply if changed (optional, but avoids redundant sets)
+        if (botModeNow == _botMode)
+            return;
+
+        _botMode = botModeNow;
+
+        if (_leftPaddleControl != null)
+            _leftPaddleControl.BotEnabled = _botMode;
+
+        if (_rightPaddleControl != null)
+            _rightPaddleControl.BotEnabled = false;
+    }
 
     public void SetHandTrackingActive(bool active)
     {
@@ -342,10 +368,19 @@ public class HandPaddleInputBridge : MonoBehaviour
         if (_winScreen != null) _winScreen.SetActive(true);
         if (_winScreenText != null)
             _winScreenText.text = $"{winner} Player Wins!";
-        
+
         _leftPaddleControl.MovementEnabled = false;
         _rightPaddleControl.MovementEnabled = false;
         _handTrackingCursor.SetActive(_handTrackingActivated);
+        _handTrackingCursor2.SetActive(_handTrackingActivated);
+    }
+
+    public void StopGame()
+    {
+        _gameOver = true;
+
+        _leftPaddleControl.MovementEnabled = false;
+        _rightPaddleControl.MovementEnabled = false;
     }
     #endregion
 
