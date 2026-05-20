@@ -16,12 +16,10 @@ public class GoogleSpeechManager : MonoBehaviour
 
     [Header("UI")]
     public TMP_Text speechToTextOutput;
+    
 
-    [Header("Google Cloud")]
-    [TextArea]
-    public string bearerToken;
-
-    public string speechToTextUrl = "https://speech.googleapis.com/v1/speech:recognize";
+    public string apiKey = "";
+    private string speechToTextUrl => $"https://speech.googleapis.com/v1/speech:recognize?key={apiKey}";
 
     private AudioClip recordedClip;
     private string microphoneDevice;
@@ -33,6 +31,8 @@ public class GoogleSpeechManager : MonoBehaviour
 
     private void Start()
     {
+        for(int i=0; i<boardNumbers.Length; i++) boardNumbers[i].SetActive(true);
+
         if (PlayerPrefs.GetInt("VoiceMode", 0) == 1)
         {
             voiceToggle.isOn = true;
@@ -51,9 +51,15 @@ public class GoogleSpeechManager : MonoBehaviour
         }
     }
 
+    public void ResetBoardNumbers() {
+        for (int i = 0; i < boardNumbers.Length; i++) boardNumbers[i].SetActive(true);
+    }
+
     public void ToggleVoiceMode()
     {
         isListening = !isListening;
+        PlayerPrefs.SetInt("VoiceMode", isListening ? 1 : 0);
+        PlayerPrefs.Save();
 
         if (isListening)
         {
@@ -157,7 +163,6 @@ public class GoogleSpeechManager : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", "Bearer " + bearerToken);
 
         yield return request.SendWebRequest();
 
@@ -216,40 +221,70 @@ public class GoogleSpeechManager : MonoBehaviour
 
         if (int.TryParse(text, out int number))
         {
-            ExecuteMove(number);
+            if (ExecuteMove(number)) {
+                boardNumbers[number-1].SetActive(false);
+            }
             return;
         }
 
         // fallback: palavras → números
         switch (text)
         {
-            case "um": ExecuteMove(1); break;
-            case "dois": ExecuteMove(2); break;
+            case "um":
+                if (ExecuteMove(1))
+                    boardNumbers[0].SetActive(false);
+                break;
+            case "dois":
+                if (ExecuteMove(2))
+                    boardNumbers[1].SetActive(false);
+                break;
             case "três":
-            case "tres": ExecuteMove(3); break;
-            case "quatro": ExecuteMove(4); break;
-            case "cinco": ExecuteMove(5); break;
-            case "seis": ExecuteMove(6); break;
-            case "sete": ExecuteMove(7); break;
-            case "oito": ExecuteMove(8); break;
-            case "nove": ExecuteMove(9); break;
+            case "tres":
+                if (ExecuteMove(3))
+                    boardNumbers[2].SetActive(false);
+                break;
+            case "quatro":
+                if (ExecuteMove(4))
+                    boardNumbers[3].SetActive(false);
+                break;
+            case "cinco":
+                if (ExecuteMove(5))
+                    boardNumbers[4].SetActive(false);
+                break;
+            case "seis":
+                if (ExecuteMove(6))
+                    boardNumbers[5].SetActive(false);
+                break;
+            case "sete":
+                if (ExecuteMove(7))
+                    boardNumbers[6].SetActive(false);
+                break;
+            case "oito":
+                if (ExecuteMove(8))
+                    boardNumbers[7].SetActive(false);
+                break;
+            case "nove":
+                if (ExecuteMove(9))
+                    boardNumbers[8].SetActive(false);
+                break;
             default:
                 Debug.Log("Comando não reconhecido: " + text);
                 break;
         }
     }
 
-    void ExecuteMove(int number)
+    bool ExecuteMove(int number)
     {
         int index = number - 1;
 
         if (index < 0 || index > 8)
         {
             Debug.Log("Número inválido");
-            return;
+            return false;
         }
 
         ticTacToe.Play(index);
+        return true;
     }
 
     [Serializable]

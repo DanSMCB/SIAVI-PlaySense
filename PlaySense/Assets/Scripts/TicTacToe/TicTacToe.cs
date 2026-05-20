@@ -25,11 +25,12 @@ public class TicTacToe : MonoBehaviour
 
     public Button[] buttons;
     private int[] board = new int[9];
+    public GameObject[] boardNumbers;
 
     public HandLandmarkerRunner handRunner;
     [SerializeField] private UnityEngine.UI.Toggle handTrackingToggle;
-    [SerializeField] private Image cursor1;
-    [SerializeField] private Image cursor2;
+    [SerializeField] private UnityEngine.UI.Toggle voiceToggle;
+    [SerializeField] private GameObject cursorCanvas;
 
     bool handTracking = false;
 
@@ -41,6 +42,8 @@ public class TicTacToe : MonoBehaviour
 
         handRunner = Object.FindFirstObjectByType<HandLandmarkerRunner>();
         StartCoroutine(SetupHandTracking());
+
+        if(voiceToggle.isOn) foreach (var num in boardNumbers) num.SetActive(true);
     }
 
     IEnumerator SetupHandTracking()
@@ -57,14 +60,10 @@ public class TicTacToe : MonoBehaviour
         {
             handTrackingToggle.isOn = true;
             handTracking = true;
-            cursor1.enabled = true;
-            cursor2.enabled = true;
             handRunner.Play();
         }
         else
         {
-            cursor1.enabled = false;
-            cursor2.enabled = false;
             handRunner.Stop();
         }
     }
@@ -72,17 +71,16 @@ public class TicTacToe : MonoBehaviour
     public void ToggleHandTracking()
     {
         handTracking = !handTracking;
-
+        PlayerPrefs.SetInt("HandTracking", handTracking ? 1 : 0);
+        PlayerPrefs.Save();
         if (handTracking)
         {
-            cursor1.enabled = true;
-            cursor2.enabled = true;
+            cursorCanvas.SetActive(true);
             handRunner.Play();
         }
         else
         {
-            cursor1.enabled = false;
-            cursor2.enabled = false;
+            cursorCanvas.SetActive(false);
             handRunner.Stop();
         }
     }
@@ -94,6 +92,8 @@ public class TicTacToe : MonoBehaviour
             Debug.Log("Posição já usada!");
             return;
         }
+
+        if (boardNumbers[index].activeSelf) boardNumbers[index].SetActive(false);
 
         Button button = buttons[index];
         Image buttonImage = button.GetComponent<Image>();
@@ -209,6 +209,7 @@ public class TicTacToe : MonoBehaviour
             buttons[i].interactable = true;
             buttons[i].GetComponent<Image>().sprite = null;
         }
+        if (voiceToggle.isOn) foreach (var num in boardNumbers) num.SetActive(true);
 
         FindObjectOfType<GoogleSpeechManager>().StopAllCoroutines();
     }
